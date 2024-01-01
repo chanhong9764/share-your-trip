@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="edu.ssafy.enjoytrip.mapper.CommentMapper">
+
+	<resultMap type="commentDto" id="commentResultMap">
+		<result column="comment_id" property="commentId"/>
+		<result column="user_id" property="userId"/>
+		<result column="article_no" property="articleNo"/>
+		<result column="content" property="content"/>
+		<result column="createdAt" property="createdAt"/>
+	</resultMap>
+
+	<select id="getComments" parameterType="int" resultMap="commentResultMap">
+		select c.comment_id, c.user_id, c.article_no, c.content, c.createdAt, u.profile 
+		from comments c
+		join users u
+		on c.user_id = u.user_id
+		where article_no = #{articleNo}
+		order by c.createdAt asc
+	</select>
+	
+	<insert id="createComment" parameterType="commentDto">
+		insert into comments (user_id, article_no, content)
+		values (#{userId}, #{articleNo}, #{content})
+	</insert>
+	
+	<delete id="deleteComment" parameterType="int">
+		delete from comments
+		where comment_id = #{commentId}
+	</delete>
+</mapper>

@@ -1,0 +1,12 @@
+# backend
+# backend/src/main/resources/application.properties
+backend/bin
+backend/target
+backend/.settings
+backend/.metadata
+backend/Servers
+
+# frontend
+frontend/node_modules
+frontend/.vscode
+/.metadata/

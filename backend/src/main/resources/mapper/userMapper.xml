@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="edu.ssafy.enjoytrip.mapper.UserMapper">
+
+	<resultMap type="userDto" id="userResultMap">
+		<result column="user_id" property="userId" />
+		<result column="user_password" property="userPassword" />
+		<result column="user_name" property="userName" />
+		<result column="email" property="email" />
+		<result column="join_date" property="joinDate" />
+		<result column="salt" property="salt" />
+		<result column="profile" property="profile" />
+	</resultMap>
+
+	<insert id="joinMember" parameterType="userDto">
+		insert into users(user_id, user_password, user_name, email, join_date, salt,
+		profile )
+		values(#{userId},#{userPassword},#{userName},#{email},now(), #{salt}, #{profile})
+	</insert>
+
+	<select id="idCheck" parameterType="String" resultType="int">
+		select COUNT(user_id) from users WHERE user_id= #{userId};
+	</select>
+
+	<select id="getSaltMember" parameterType="map"
+		resultType="userDto">
+		SELECT salt FROM users
+		WHERE user_id= #{userId};
+	</select>
+
+	<select id="loginMemberSalt" parameterType="map"
+		resultMap="userResultMap">
+		SELECT user_id, user_name, email, join_date, profile
+		FROM users
+		WHERE user_id= #{userId} AND user_password= #{userPassword};
+	</select>
+
+	<update id="modifyUser" parameterType="userDto">
+		UPDATE users
+		SET user_name=#{userName}, email = #{email}
+		WHERE user_id =#{userId} AND user_password=#{userPassword};
+	</update>
+
+	<select id="findPw" parameterType="userDto" resultType="int">
+		SELECT COUNT(*) AS COUNT
+		FROM users
+		WHERE user_id= #{userId} AND email = #{email};
+	</select>
+
+	<delete id="deleteMember" parameterType="userDto">
+		DELETE FROM users WHERE user_id=#{userId};
+	</delete>
+
+	<select id="getMember" parameterType="string"
+		resultMap="userResultMap">
+		select user_id, user_name, email, join_date, profile
+		from users
+		where user_id = #{userId}
+	</select>
+	
+	<select id="searchMember" parameterType="string" resultMap="userResultMap">
+		select user_id, user_name, email, join_date, profile
+		from users
+		where user_id like CONCAT('%', #{userId}, '%')
+	</select>
+	
+	<select id="findId" parameterType="String" resultType="String">
+		SELECT user_id
+		FROM users
+		WHERE email = #{email};
+	</select>
+	
+	<select id="changePwd" parameterType="String">
+		<!-- 패스워드 변경 -->
+	</select>
+
+	<update id="changeProfile" parameterType="userDto">
+		update users set profile = #{profile}
+		where user_id = #{userId}
+	</update>
+</mapper>
