@@ -31,6 +31,7 @@
 | Backend | ![Static Badge](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=flat) ![Static Badge](https://img.shields.io/badge/MySQL-%234479A1?style=flat) ![Static Badge](https://img.shields.io/badge/STOMP-%23000000?style=flat) ![Static Badge](https://img.shields.io/badge/Postman-%23FF6C37?style=flat) |
 | Frontend | ![Static Badge](https://img.shields.io/badge/Vue.js-%234FC08D?style=flat) ![Static Badge](https://img.shields.io/badge/HTML5-%23E34F26) ![Static Badge](https://img.shields.io/badge/CSS3-%231572B6) ![Static Badge](https://img.shields.io/badge/Bootstrap-%237952B3?style=flat) ![Static Badge](https://img.shields.io/badge/Pinia-%23ffd859?style=flat) ![Static Badge](https://img.shields.io/badge/STOMP-%23000000?style=flat) |
 | Communication | ![Static Badge](https://img.shields.io/badge/Figma-%23F24E1E) ![Static Badge](https://img.shields.io/badge/Mattermost-%230058CC) ![Static Badge](https://img.shields.io/badge/GitLab-%23FC6D26) |
+<br>
 
 ## 📌 주요 기능
 #### 로그인 - <a href="https://github.com/chaehyuenwoo/SpringBoot-Project-MEGABOX/wiki/%EC%A3%BC%EC%9A%94-%EA%B8%B0%EB%8A%A5-%EC%86%8C%EA%B0%9C(Login)" >상세보기 - WIKI 이동</a>
