@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="edu.ssafy.enjoytrip.mapper.ChatMapper">
+	
+	<resultMap type="chattingRoomDto" id="chatResultMap">
+		<result column="room_id" property="roomId"/>
+		<result column="identifier" property="identifier"/>
+		<result column="content" property="content"/>
+		<result column="room_name" property="roomName"/>
+		<result column="createdAt" property="createdAt"/>
+	</resultMap>
+	
+	<resultMap type="chattingDto" id="chattingResultMap">
+		<result column="chatting_id" property="chattingId"/>
+		<result column="message" property="message"/>
+		<result column="user_id" property="userId"/>
+		<result column="room_id" property="roomId"/>
+		<result column="createdAt" property="createdAt"/>
+		<result column="profile" property="profile" />
+	</resultMap>
+	
+	<resultMap type="userdto" id="participantResultMap">
+		<result column="user_id" property="userId"/>
+		<result column="user_name" property="userName"/>
+		<result column="email" property="email"/>
+		<result column="profile" property="profile"/>
+	</resultMap>
+	
+	<resultMap type="invitationDto" id="invitationResultMap">
+		<result column="identifier" property="identifier"/>
+		<result column="participant_id" property="participantId"/>
+	</resultMap>
+	
+	<select id="getChattingRoomList" parameterType="String" resultMap="chatResultMap">
+		select c.room_id, c.identifier, c.content, c.room_name, c.createdAt
+		from chatting_room c
+		join chatting_participant p
+		on c.room_id = p.room_id
+		where p.user_id = #{userId} 
+		and p.isAccepted = 1;
+	</select>
+	
+	<select id="getChattingRoom" parameterType="int" resultMap="chatResultMap">
+		select room_id, identifier, content, room_name, createdAt
+		from chatting_room
+		where room_id = #{roomId} 
+	</select>
+	
+	<insert id="createChattingRoom" parameterType="ChattingRoomDto" >
+		insert into chatting_room (identifier, content, room_name)
+		values (#{identifier}, #{content}, #{roomName})
+		<selectKey resultType="int" keyProperty="roomId" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<delete id="deleteChattingRoom" parameterType="map">
+		delete from chatting_participant
+		where room_id = #{roomId} and user_id = #{userId}
+	</delete>
+	
+	<insert id="createParticipantRoom" parameterType="chattingParticipantDto">
+		insert into chatting_participant (room_id, user_id)
+		values (#{roomId}, #{userId})
+	</insert>
+	
+	<update id="updateParticipantRoom" parameterType="map">
+		update chatting_participant
+		set isAccepted = 1
+		where room_id = #{roomId} and user_id = #{userId}
+	</update>
+	
+	<update id="updateParticipantRoomById" parameterType="String">
+		update chatting_participant
+		set isAccepted = 1
+		where participant_id = #{participantId}
+	</update>
+	
+	<delete id="deleteChattingRoomById" parameterType="String">
+		delete from chatting_participant
+		where participant_id = #{participantId}
+	</delete>
+	
+	<select id="getInvitation" parameterType="String" resultMap="invitationResultMap">
+		select c.identifier, p.participant_id
+		from chatting_participant p 
+		join chatting_room c
+		on p.room_id = c.room_id
+		where user_id = #{userId}
+		and isAccepted = 0
+	</select>
+	
+	<select id="getInvitationById" parameterType="map" resultMap="invitationResultMap">
+		select c.identifier, p.participant_id
+		from chatting_participant p 
+		join chatting_room c
+		on p.room_id = c.room_id
+		where user_id = #{userId} 
+		and p.room_id = #{roomId}
+		and isAccepted = 0
+	</select>
+	
+	<insert id="createChatting" parameterType="chattingDto">
+		insert into chatting (room_id, user_id, message)
+		values (#{roomId}, #{userId}, #{message})
+		<selectKey resultType="int" keyProperty="chattingId" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<select id="getParticipant" parameterType="map" resultMap="participantResultMap">
+		select u.user_id, u.user_name, u.email, u.profile 
+		from chatting_participant p
+		join users u
+		on p.user_id = u.user_id
+		where room_id = #{roomId} and p.isAccepted = 1;
+	</select>
+	
+	<select id="getChattingList" parameterType="map" resultMap="chattingResultMap">
+		select * from (
+			select c.chatting_id, c.message, c.createdAt, c.room_id, u.profile, u.user_id
+				from chatting c
+				join users u
+				on c.user_id = u.user_id
+				where room_id = #{roomId}
+		        order by createdAt desc
+		        limit #{start}, #{listsize}
+		    ) t
+		    order by t.createdAt asc;
+	</select>
+	
+	<select id="getChattingListRange" parameterType="map" resultMap="chattingResultMap">
+		select * from (
+			select c.chatting_id, c.message, c.createdAt, c.room_id, u.profile, u.user_id
+			from chatting c
+			join users u
+			on c.user_id = u.user_id
+			where room_id = #{roomId}
+		    and chatting_id between #{endId} and #{startId}
+			order by createdAt desc
+		) t
+		order by t.createdAt asc;
+	</select>
+	
+	<select id="getChattingId" parameterType="map" resultType="Integer">
+		select chatting_id
+		from chatting
+		where message like CONCAT('%', #{word}, '%')
+		and room_id = #{roomId}
+		and chatting_id &lt; #{startId}
+		order by chatting_id desc
+		limit 1
+	</select>
+</mapper>

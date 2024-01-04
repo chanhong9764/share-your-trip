@@ -30,14 +30,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(errorCode);
     }
 
-	// Valid에 의한 유효성 검증 실패, 잘못된 파라미터 입력 처리
+    // 잘못된 파라미터를 넘겼을 경우 처리
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(final IllegalArgumentException e) {
         final ErrorCode errorCode = CommonErrorCode.INVALID_PARAMETER;
         return handleExceptionInternal(errorCode, e.getMessage());
     }
-    
-    // Spring 내장에서 발생한 에러 처리
+
+    // Valid에 의한 유효성 검증 실패, 잘못된 파라미터 입력 처리
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(
             final MethodArgumentNotValidException e,

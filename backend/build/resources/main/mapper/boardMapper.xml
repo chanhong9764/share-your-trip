@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="edu.ssafy.enjoytrip.mapper.BoardMapper">
+	
+	<resultMap type="boardDto" id="boardResultMap">
+		<result column="article_no" property="articleNo"/>
+		<result column="user_id" property="userId"/>
+		<result column="content" property="content"/>
+		<result column="recommend_cnt" property="recommendCnt"/>
+		<result column="createdAt" property="createdAt"/>
+	</resultMap>
+	
+	<resultMap type="boardResponseDto" id="boardListResultMap">
+		<result column="article_no" property="articleNo"/>
+		<result column="user_id" property="userId"/>
+		<result column="content" property="content"/>
+		<result column="recommend_cnt" property="recommendCnt"/>
+		<result column="createdAt" property="createdAt"/>
+		<result column="profile" property="profile"/>
+	</resultMap>
+	
+	<resultMap type="imageDto" id="file">
+		<result column="file_id" property="fildId" />
+		<result column="article_no" property="articleNo" />
+		<result column="save_folder" property="saveFolder"/>
+		<result column="original_name" property="originalName"/>
+		<result column="save_file" property="saveFile"/>
+	</resultMap>
+	
+	<resultMap type="hashTagDto" id="hashtagResultMap">
+		<result column="hashtag_id" property="hashtagId" />
+		<result column="name" property="name"/>
+	</resultMap>
+	
+	<select id="listArticle" parameterType="map" resultMap="boardListResultMap">
+		select t.article_no, t.user_id, t.profile, t.content, count(recommend_id) as recommend_cnt, t.createdAt
+		from (
+			select b.article_no, b.user_id, u.profile, b.content, b.createdAt
+			from board b
+			join users u
+			on b.user_id = u.user_id
+		) as t
+		left join recommend as r
+		on t.article_no = r.article_no
+		group by t.article_no
+		order by
+		<if test="type == 1">
+			recommend_cnt desc,
+		</if> 
+		t.article_no desc
+		limit #{start}, #{listsize}
+	</select>
+	
+	<select id="listArticleByHashtag" parameterType="map" resultMap="boardListResultMap" >
+		select d.article_no, d.user_id, d.profile, d.content, count(recommend_id) as recommend_cnt, d.createdAt
+		from (
+			select c.article_no, c.user_id, c.content, c.createdAt, u.profile  from 
+			(
+				select a.article_no, a.user_id, a.content, a.createdAt 
+				from board a
+				join (
+					select distinct(article_no)
+					from hashtag h
+					join board_tag b
+					on h.hashtag_id = b.hashtag_id
+					where h.name = #{hashtag}
+				) b
+				on a.article_no = b.article_no
+			) c
+			join users u
+			on c.user_id = u.user_id
+		) d
+		left join recommend as r
+		on d.article_no = r.article_no
+		group by d.article_no
+		order by
+		<if test="type == 1">
+			recommend_cnt desc,
+		</if>  
+		d.article_no desc
+		limit #{start}, #{listsize}
+	</select>
+	
+	
+	<select id="getHashTagByArticleNo" parameterType="int" resultType="hashTagDto">
+		select h.hashtag_id, name
+		from board_tag b
+		join hashtag h
+		on b.hashtag_id = h.hashtag_id
+		where article_no = #{articleNo};
+	</select>
+	
+	<delete id="deleteHotBoard" >
+		delete from hot_board
+	</delete>
+	
+	<insert id="writeArticle" parameterType="boardDto">
+		insert into board (user_id, content)
+		values (#{userId}, #{content})
+		<selectKey resultType="int" keyProperty="articleNo" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<insert id="registerFile" parameterType="boardDto">
+		insert into board_images (article_no, save_folder, original_name, save_file)
+		values
+		<foreach collection="images" item="image" separator=" , ">
+			(#{articleNo}, #{image.saveFolder}, #{image.originalName}, #{image.saveFile})
+		</foreach>
+	</insert>
+	
+	<select id="getBoardImagesByArticleNo" resultMap="file">
+		select save_folder, save_file, original_name
+		from board_images
+		where article_no = #{articleNo}
+	</select>
+	
+	
+	<select id="getArticle" parameterType="int" resultMap="boardListResultMap">
+		select t.article_no, t.user_id, t.profile, t.content, count(recommend_id) as recommend_cnt, t.createdAt
+		from (
+			select b.article_no, b.user_id, u.profile, b.content, b.createdAt
+			from board b
+			join users u
+			on b.user_id = u.user_id
+		) as t
+		left join recommend as r
+		on t.article_no = r.article_no
+		where t.article_no = #{articleNo}
+	</select>
+	
+	<select id="getRecommendCount" parameterType="int" resultType="int">
+		select count(*)
+		from recommend
+		where article_no = #{articleNo}
+	</select>
+	
+	<select id="getRecommendUser" parameterType="map" resultType="Integer">
+		select count(*)
+		from recommend
+		where article_no = #{articleNo} and user_id = #{userId}
+	</select>
+	
+	<update id="modifyArticle" parameterType="boardDto">
+		update board
+		set content = #{content}
+		where article_no = #{articleNo}
+	</update>
+	
+	<delete id="removeImages" parameterType="String">
+		delete from board_images
+		where save_file = #{image}
+	</delete>
+	
+	<delete id="deleteArticle" parameterType="int">
+		delete from board
+		where article_no = #{articleNo}
+	</delete>
+	
+	<insert id="setRecommend" parameterType="map">
+		insert into recommend (user_id, article_no)
+		values (#{userId}, #{articleNo})
+	</insert>
+	
+	<delete id="delRecommend" parameterType="map">
+		delete from recommend
+		where article_no = #{articleNo} and user_id = #{userId}
+	</delete>
+	
+	<select id="isExistHashTag" parameterType="String" resultType="Integer">
+		select hashtag_id
+		from hashtag
+		where name = #{tag}
+	</select>
+	
+	<insert id="createHashTag" parameterType="hashTagDto">
+		insert into hashtag (name)
+		values (#{name})
+		<selectKey resultType="int" keyProperty="hashtagId" order="AFTER">
+			select last_insert_id()
+		</selectKey>
+	</insert>
+	
+	<insert id="createRelationHashTag" parameterType="map">
+		insert into board_tag (article_no, hashtag_id)
+		values (#{articleNo}, #{hashtagId})
+	</insert>
+	
+	<delete id="removeHashTag" parameterType="String">
+		delete from hashtag
+		where name = #{tag}
+	</delete>
+	
+	<select id="getHotHashTag" resultType="hashTagDto">
+		select t.hashtag_id, h.name from (
+			select hashtag_id
+			from board_tag 
+			group by hashtag_id
+			order by count(hashtag_id) desc
+			limit 0, 9
+		) t
+		join hashtag h
+		on t.hashtag_id = h.hashtag_id;
+	</select>
+</mapper>
