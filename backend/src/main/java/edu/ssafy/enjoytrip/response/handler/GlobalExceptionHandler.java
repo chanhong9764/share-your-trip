@@ -1,4 +1,4 @@
-package edu.ssafy.enjoytrip.error.handler;
+package edu.ssafy.enjoytrip.response.handler;
 
 import java.util.List;
 
@@ -13,10 +13,10 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
-import edu.ssafy.enjoytrip.error.errorcode.CommonErrorCode;
-import edu.ssafy.enjoytrip.error.errorcode.ErrorCode;
-import edu.ssafy.enjoytrip.error.exception.RestApiException;
-import edu.ssafy.enjoytrip.error.response.ErrorResponse;
+import edu.ssafy.enjoytrip.response.code.CommonErrorCode;
+import edu.ssafy.enjoytrip.response.code.ErrorCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import edu.ssafy.enjoytrip.response.structure.ErrorResponse;
 
 import java.util.stream.Collectors;
 

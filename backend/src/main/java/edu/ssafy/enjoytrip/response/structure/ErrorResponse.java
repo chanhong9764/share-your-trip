@@ -1,4 +1,4 @@
-package edu.ssafy.enjoytrip.error.response;
+package edu.ssafy.enjoytrip.response.structure;
 
 import java.util.List;
 
@@ -16,8 +16,7 @@ import lombok.RequiredArgsConstructor;
 public class ErrorResponse {
 	private final String code;
 	private final String message;
-	
-	// errors에 값이 없으면 응답 X
+
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final List<ValidationError> errors;
 	

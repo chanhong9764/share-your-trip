@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Alias("userdto")
+@Alias("user")
 public class UserDto {
 	private String userId;
 	private String userPassword;

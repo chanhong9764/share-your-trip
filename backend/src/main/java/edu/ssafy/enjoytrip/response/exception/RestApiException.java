@@ -1,6 +1,6 @@
-package edu.ssafy.enjoytrip.error.exception;
+package edu.ssafy.enjoytrip.response.exception;
 
-import edu.ssafy.enjoytrip.error.errorcode.ErrorCode;
+import edu.ssafy.enjoytrip.response.code.ErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 

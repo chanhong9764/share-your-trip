@@ -3,6 +3,7 @@ package edu.ssafy.enjoytrip.mapper;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.catalina.User;
 import org.apache.ibatis.annotations.Mapper;
@@ -12,7 +13,7 @@ import edu.ssafy.enjoytrip.dto.user.UserDto;
 @Mapper
 public interface UserMapper {
 
-	int idCheck(String userId) throws SQLException;
+	Optional<UserDto> findById(String userId);
 	int joinMember(UserDto memberDto) throws SQLException;
 	UserDto getSaltMember(Map<String, String> map) throws SQLException;
 	boolean modifyUser(UserDto dto);

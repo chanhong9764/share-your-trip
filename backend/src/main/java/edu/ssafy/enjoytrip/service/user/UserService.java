@@ -1,13 +1,15 @@
 package edu.ssafy.enjoytrip.service.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 
 public interface UserService {
 
-	int idCheck(String userId) throws Exception;
+	// 유저 ID를 이용하여 사용자 검색
+	Optional<UserDto> findById(String userId) throws Exception;
 	int joinMember(UserDto memberDto) throws Exception;
 	UserDto loginMember(String userId, String userPwd) throws Exception;
 	boolean modifyUser(UserDto dto);
