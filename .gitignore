@@ -5,8 +5,27 @@ backend/target
 backend/.settings
 backend/.metadata
 backend/Servers
+backend/.gradle
+backend/out
+backend/build
+backend/.classpath
+backend/.project
+backend/gradle
+backend/gradlew
+backend/gradle.bat
+
+### IntelliJ IDEA ###
+backend/.idea
+backend/*.iws
+backend/*.iml
+backend/*.ipr
+backend/out/
+backend/!**/src/main/**/out/
+backend/!**/src/test/**/out/
 
 # frontend
 frontend/node_modules
 frontend/.vscode
 /.metadata/
+
+
