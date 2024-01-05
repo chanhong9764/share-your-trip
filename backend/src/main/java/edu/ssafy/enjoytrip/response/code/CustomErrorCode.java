@@ -1,4 +1,4 @@
-package edu.ssafy.enjoytrip.error.errorcode;
+package edu.ssafy.enjoytrip.response.code;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,8 +8,7 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum CustomErrorCode implements ErrorCode {
 
-    INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "Invalid parameter included"),
-    RESOURCE_NOT_FOUND(HttpStatus.NOT_FOUND, "Cannot find resource."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "유저의 정보가 존재하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;

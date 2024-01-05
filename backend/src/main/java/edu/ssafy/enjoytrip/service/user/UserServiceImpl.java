@@ -8,12 +8,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.apache.ibatis.session.SqlSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.mapper.BoardMapper;
 import edu.ssafy.enjoytrip.mapper.UserMapper;
@@ -26,26 +24,27 @@ public class UserServiceImpl implements UserService {
 	private final BoardMapper BoardMapper;
 
 	@Override
-	public int idCheck(String userId) throws Exception {
-		System.out.println(userId);
-		return userMapper.idCheck(userId);
+	public Optional<UserDto> findById(String userId) {
+		return userMapper.findById(userId);
 	}
 
 	@Override
 	public int joinMember(UserDto memberDto) throws Exception {
 		byte[] salt = null;
+		// 에러 핸들링
 		try {
 			salt = getSalt();
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-		System.out.println(memberDto);
+		// 멤버 에러 핸들링?
 		byte[] byteDigestPsw = getSaltHashSHA512(memberDto.getUserPassword(), salt);
 		String strDigestPsw = toHex(byteDigestPsw);
 		String strSalt = toHex(salt);
 
 		memberDto.setUserPassword(strDigestPsw);
 		memberDto.setSalt(strSalt);
+		// 여기도 에러 핸들링?
 		return userMapper.joinMember(memberDto);
 	}
 
@@ -54,6 +53,7 @@ public class UserServiceImpl implements UserService {
 		Map<String, String> map = new HashMap<String, String>();
 		map.put("userId", userId);
 		map.put("userPassword", userPwd);
+		// 에러 핸들링
 		UserDto dto = userMapper.getSaltMember(map);
 		byte[] salt = null;
 		String strSalt = dto.getSalt();
@@ -62,7 +62,7 @@ public class UserServiceImpl implements UserService {
 		String strDigestPsw = toHex(byteDigestPsw);
 
 		map.put("userPassword", strDigestPsw);
-
+		// 에러 핸들링
 		UserDto result = userMapper.loginMemberSalt(map);
 		return result;
 	}

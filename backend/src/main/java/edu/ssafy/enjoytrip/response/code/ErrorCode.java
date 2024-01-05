@@ -1,4 +1,4 @@
-package edu.ssafy.enjoytrip.error.errorcode;
+package edu.ssafy.enjoytrip.response.code;
 
 import org.springframework.http.HttpStatus;
 

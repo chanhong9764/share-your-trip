@@ -2,15 +2,8 @@ package edu.ssafy.enjoytrip.controller.user;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +18,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
 
-import edu.ssafy.enjoytrip.dto.board.BoardDto;
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
-import edu.ssafy.enjoytrip.error.errorcode.CustomErrorCode;
-import edu.ssafy.enjoytrip.error.exception.RestApiException;
+import edu.ssafy.enjoytrip.response.code.CustomErrorCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import edu.ssafy.enjoytrip.service.user.UserService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
@@ -144,22 +135,14 @@ public class UserController {
 	}
 
 	@GetMapping("/check/{userid}")
-	public ResponseEntity<Map<String, Object>> CheckId(@PathVariable("userid") String userId) throws Exception {
+	public ResponseEntity<Object> CheckId(@PathVariable("userid") String userId) throws Exception {
 		Map<String, Object> map = new HashMap();
-		try {
-			if (service.idCheck(userId) == 0) {
-				map.put("resdata", false);
-			} else {
-				map.put("resdata", true);
-			}
-			map.put("resmsg", "중복확인");
-
-		} catch (Exception e) {
-			map.put("resmsg", "중복확인불가");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+		UserDto user = service.findById(userId)
+				.orElseThrow(() -> new RestApiException(CustomErrorCode.USER_NOT_FOUND));
+		map.put("message", "중복되는 ID입니다.");
+		map.put("result", user);
+		
+		return new ResponseEntity<>(map, HttpStatus.OK);
 	}
 
 	@GetMapping("/findId/{email}")
