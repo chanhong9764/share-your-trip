@@ -12,7 +12,7 @@ backend/.classpath
 backend/.project
 backend/gradle
 backend/gradlew
-backend/gradle.bat
+backend/gradlew.bat
 
 ### IntelliJ IDEA ###
 backend/.idea
