@@ -186,7 +186,7 @@ export const useSocketStore = defineStore('socket', () => {
     };
 
     const connectSocket = () => {
-        const serverURL = 'http://192.168.0.53:8080/';
+        const serverURL = 'http://192.168.31.144:8080/';
         // const serverURL = 'http://172.30.1.34:8080';
         // const serverURL = 'http://192.168.0.53:8080';
         //const serverURL = 'http://192.168.205.75:8080'; // 인상 자리
