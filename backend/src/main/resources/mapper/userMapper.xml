@@ -6,7 +6,7 @@
 <mapper
 	namespace="edu.ssafy.enjoytrip.mapper.UserMapper">
 
-	<resultMap type="userDto" id="userResultMap">
+	<resultMap type="user" id="userResultMap">
 		<result column="user_id" property="userId" />
 		<result column="user_password" property="userPassword" />
 		<result column="user_name" property="userName" />
@@ -16,7 +16,7 @@
 		<result column="profile" property="profile" />
 	</resultMap>
 
-	<insert id="joinMember" parameterType="userDto">
+	<insert id="joinMember" parameterType="user">
 		insert into users(user_id, user_password, user_name, email, join_date, salt,
 		profile )
 		values(#{userId},#{userPassword},#{userName},#{email},now(), #{salt}, #{profile})
@@ -29,7 +29,7 @@
 	</select>
 
 	<select id="getSaltMember" parameterType="map"
-		resultType="userDto">
+		resultType="user">
 		SELECT salt FROM users
 		WHERE user_id= #{userId};
 	</select>
@@ -41,19 +41,19 @@
 		WHERE user_id= #{userId} AND user_password= #{userPassword};
 	</select>
 
-	<update id="modifyUser" parameterType="userDto">
+	<update id="modifyUser" parameterType="user">
 		UPDATE users
 		SET user_name=#{userName}, email = #{email}
 		WHERE user_id =#{userId} AND user_password=#{userPassword};
 	</update>
 
-	<select id="findPw" parameterType="userDto" resultType="int">
+	<select id="findPw" parameterType="user" resultType="int">
 		SELECT COUNT(*) AS COUNT
 		FROM users
 		WHERE user_id= #{userId} AND email = #{email};
 	</select>
 
-	<delete id="deleteMember" parameterType="userDto">
+	<delete id="deleteMember" parameterType="user">
 		DELETE FROM users WHERE user_id=#{userId};
 	</delete>
 
@@ -80,7 +80,7 @@
 		<!-- 패스워드 변경 -->
 	</select>
 
-	<update id="changeProfile" parameterType="userDto">
+	<update id="changeProfile" parameterType="user">
 		update users set profile = #{profile}
 		where user_id = #{userId}
 	</update>

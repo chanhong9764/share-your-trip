@@ -21,7 +21,7 @@
 		<result column="profile" property="profile" />
 	</resultMap>
 	
-	<resultMap type="userdto" id="participantResultMap">
+	<resultMap type="user" id="participantResultMap">
 		<result column="user_id" property="userId"/>
 		<result column="user_name" property="userName"/>
 		<result column="email" property="email"/>
