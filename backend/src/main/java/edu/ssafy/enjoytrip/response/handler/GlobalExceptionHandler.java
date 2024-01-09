@@ -1,6 +1,5 @@
 package edu.ssafy.enjoytrip.response.handler;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -14,8 +13,8 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 
-import edu.ssafy.enjoytrip.response.code.CommonErrorCode;
-import edu.ssafy.enjoytrip.response.code.ErrorCode;
+import edu.ssafy.enjoytrip.response.code.CommonResponseCode;
+import edu.ssafy.enjoytrip.response.code.ResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import edu.ssafy.enjoytrip.response.structure.ErrorResponse;
 
@@ -29,8 +28,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	 */
 	@ExceptionHandler(RestApiException.class)
     public ResponseEntity<Object> handleRestApiException(final RestApiException e) {
-        final ErrorCode errorCode = e.getErrorCode();
-        return handleExceptionInternal(errorCode);
+        final ResponseCode responseCode = e.getResponseCode();
+        return handleExceptionInternal(responseCode);
     }
 
     /**
@@ -38,8 +37,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(final IllegalArgumentException e) {
-        final ErrorCode errorCode = CommonErrorCode.INVALID_PARAMETER;
-        return handleExceptionInternal(errorCode, e.getMessage());
+        final ResponseCode responseCode = CommonResponseCode.INVALID_PARAMETER;
+        return handleExceptionInternal(responseCode, e.getMessage());
     }
 
     /**
@@ -51,8 +50,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             final HttpHeaders headers,
             final HttpStatus status,
             final WebRequest request) {
-        final ErrorCode errorCode = CommonErrorCode.INVALID_PARAMETER;
-        return handleExceptionInternal(e, errorCode);
+        final ResponseCode responseCode = CommonResponseCode.INVALID_PARAMETER;
+        return handleExceptionInternal(e, responseCode);
     }
 
     /**
@@ -60,40 +59,40 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllException(final Exception e) {
-        final ErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
-        return handleExceptionInternal(errorCode);
+        final ResponseCode responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR;
+        return handleExceptionInternal(responseCode);
     }
 
-    private ResponseEntity<Object> handleExceptionInternal(final ErrorCode errorCode) {
-        return ResponseEntity.status(errorCode.getHttpStatus())
-                .body(makeErrorResponse(errorCode));
+    private ResponseEntity<Object> handleExceptionInternal(final ResponseCode responseCode) {
+        return ResponseEntity.status(responseCode.getHttpStatus())
+                .body(makeErrorResponse(responseCode));
     }
 
-    private ResponseEntity<Object> handleExceptionInternal(final ErrorCode errorCode, final String message) {
-        return ResponseEntity.status(errorCode.getHttpStatus())
-                .body(makeErrorResponse(errorCode, message));
+    private ResponseEntity<Object> handleExceptionInternal(final ResponseCode responseCode, final String message) {
+        return ResponseEntity.status(responseCode.getHttpStatus())
+                .body(makeErrorResponse(responseCode, message));
     }
 
-    private ResponseEntity<Object> handleExceptionInternal(final BindException e, final ErrorCode errorCode) {
-        return ResponseEntity.status(errorCode.getHttpStatus())
-                .body(makeErrorResponse(e, errorCode));
+    private ResponseEntity<Object> handleExceptionInternal(final BindException e, final ResponseCode responseCode) {
+        return ResponseEntity.status(responseCode.getHttpStatus())
+                .body(makeErrorResponse(e, responseCode));
     }
 
-    private ErrorResponse makeErrorResponse(final ErrorCode errorCode) {
+    private ErrorResponse makeErrorResponse(final ResponseCode responseCode) {
         return ErrorResponse.builder()
-                .code(errorCode.name())
-                .message(errorCode.getMessage())
+                .code(responseCode.name())
+                .message(responseCode.getMessage())
                 .build();
     }
 
-    private ErrorResponse makeErrorResponse(final ErrorCode errorCode, final String message) {
+    private ErrorResponse makeErrorResponse(final ResponseCode responseCode, final String message) {
         return ErrorResponse.builder()
-                .code(errorCode.name())
+                .code(responseCode.name())
                 .message(message)
                 .build();
     }
 
-    private ErrorResponse makeErrorResponse(final BindException e, final ErrorCode errorCode) {
+    private ErrorResponse makeErrorResponse(final BindException e, final ResponseCode responseCode) {
         final List<ErrorResponse.ValidationError> validationErrorList = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -101,8 +100,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .collect(Collectors.toList());
 
         return ErrorResponse.builder()
-                .code(errorCode.name())
-                .message(errorCode.getMessage())
+                .code(responseCode.name())
+                .message(responseCode.getMessage())
                 .errors(validationErrorList)
                 .build();
     }

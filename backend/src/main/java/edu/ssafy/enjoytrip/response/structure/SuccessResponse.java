@@ -1,7 +1,6 @@
 package edu.ssafy.enjoytrip.response.structure;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import edu.ssafy.enjoytrip.response.code.ErrorCode;
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import lombok.Builder;
 import lombok.Getter;

@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @RequiredArgsConstructor
-public enum CommonErrorCode implements ErrorCode {
+public enum CommonResponseCode implements ResponseCode {
     // 400 BAD_REQUEST : 유효하지 않은 파라미터
     INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "유효하지 않은 파라미터입니다."),
     // 401 UNAUTHORIZED : 인증되지 않은 사용자
