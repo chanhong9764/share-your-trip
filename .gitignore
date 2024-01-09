@@ -10,7 +10,6 @@ backend/out
 backend/build
 backend/.classpath
 backend/.project
-backend/gradle
 backend/gradlew
 backend/gradlew.bat
 

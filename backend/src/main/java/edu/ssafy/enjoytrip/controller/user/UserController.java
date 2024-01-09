@@ -1,15 +1,12 @@
 package edu.ssafy.enjoytrip.controller.user;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,7 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
-import edu.ssafy.enjoytrip.response.code.CustomErrorCode;
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import edu.ssafy.enjoytrip.service.user.UserService;
 import io.swagger.annotations.Api;
@@ -44,98 +41,45 @@ public class UserController {
 
 	@PostMapping
 	public ResponseEntity<Object> CreateUser(@RequestBody UserDto dto) {
-		// 테스트해보고 오류 어떻게 확인하고 에러 처리
 		service.createUser(dto);
-
-		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER);
+		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER_SUCCESS);
 	}
 
 	@PutMapping
-	public ResponseEntity<Map<String, Object>> ModifyUser(@RequestBody UserDto dto) {
-		Map<String, Object> map = new HashMap<>();
-		try {
-			boolean res = service.modifyUser(dto);
-			map.put("resdata", res);
-			map.put("resmsg", "수정성공");
-
-		} catch (Exception e) {
-			map.put("resmsg", "수정실패");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> ModifyUser(@RequestBody UserDto dto) {
+		UserDto user = service.modifyUser(dto);
+		return SuccessResponse.createSuccess(SuccessCode.MODIFY_USER_SUCCESS, user);
 	}
 
 	@DeleteMapping("/{userid}")
-	public ResponseEntity<Map<String, Object>> DeleteUser(@PathVariable("userid") String id) {
-		Map<String, Object> map = new HashMap<>();
-		UserDto dto = new UserDto();
-		dto.setUserId(id);
-		try {
-			boolean res = service.deleteMember(dto);
-			map.put("resdata", res);
-			map.put("resmsg", "삭제성공");
-
-		} catch (Exception e) {
-			map.put("resmsg", "삭제실패");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> DeleteUser(@PathVariable("userid") String userId) {
+		service.deleteUser(userId);
+		return SuccessResponse.createSuccess(SuccessCode.DELETE_USER_SUCCESS);
 	}
 
 	@GetMapping("/{userid}")
-	public ResponseEntity<Map<String, Object>> GetUserInfo(@PathVariable("userid") String userId) throws Exception {
-		Map<String, Object> map = new HashMap();
-		try {
-			UserDto member = service.getMember(userId);
-			map.put("msg", "유저 정보 확인 성공!");
-			map.put("result", member);
-		} catch (Exception e) {
-			map.put("resmsg", "중복확인불가");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> GetUser(@PathVariable("userid") String userId) {
+		UserDto user = service.findById(userId);
+		return SuccessResponse.createSuccess(SuccessCode.READ_USER_SUCCESS, user);
 	}
 
 	@GetMapping("/search/{userid}")
-	public ResponseEntity<Map<String, Object>> SearchUser(@PathVariable("userid") String userId) throws Exception {
-		Map<String, Object> map = new HashMap();
-		try {
-			List<UserDto> searchMember = service.searchMember(userId);
-			map.put("msg", "유저 검색 성공!");
-			map.put("result", searchMember);
-		} catch (Exception e) {
-			map.put("resmsg", "중복확인불가");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> SearchUser(@PathVariable("userid") String userId) {
+		List<UserDto> userList = service.searchUser(userId);
+		return SuccessResponse.createSuccess(SuccessCode.SEARCH_USER_SUCCESS, userList);
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Map<String, Object>> Login(@RequestBody UserDto memberDto) {
-		Map<String, Object> map = new HashMap();
-		try {
-			UserDto res = service.loginMember(memberDto.getUserId(), memberDto.getUserPassword());
-			System.out.println(res);
-			map.put("result", res);
-			map.put("resmsg", "로그인성공");
+	public ResponseEntity<Object> Login(@RequestBody UserDto dto) {
+		UserDto user = service.login(dto);
 
-		} catch (Exception e) {
-			map.put("resmsg", "로그인실패");
-			map.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+		return SuccessResponse.createSuccess(SuccessCode.LOGIN_USER_SUCCESS, user);
 	}
 
 	@GetMapping("/check/{userid}")
-	public ResponseEntity<Object> CheckId(@PathVariable("userid") String userId) {
-		UserDto user = service.findById(userId)
-				.orElseThrow(() -> new RestApiException(CustomErrorCode.USER_NOT_FOUND));
-		return SuccessResponse.createSuccess(SuccessCode.LOGIN_SUCCESS, user);
+	public ResponseEntity<Object> CheckById(@PathVariable("userid") String userId) {
+		service.checkById(userId);
+		return SuccessResponse.createSuccess(SuccessCode.VALID_USER_ID_SUCCESS);
 	}
 
 	@GetMapping("/findId/{email}")

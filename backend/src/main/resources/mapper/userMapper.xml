@@ -21,30 +21,39 @@
         values(#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{salt}, #{profile})
     </insert>
 
+    <update id="modifyUser" parameterType="user">
+        UPDATE users
+        SET user_password = #{userPassword}
+        WHERE user_id = #{userId};
+    </update>
+
+    <delete id="deleteUser" parameterType="string">
+        DELETE FROM users
+        WHERE user_id=#{userId};
+    </delete>
+
     <select id="findById" parameterType="String" resultMap="userResultMap">
         select user_id, user_name, email, join_date, profile
         from users
-        WHERE user_id= #{userId};
+        WHERE user_id = #{userId};
     </select>
 
-    <select id="getSaltMember" parameterType="map"
-            resultType="user">
+    <select id="checkById" parameterType="String" resultType="string">
+        select user_id
+        from users
+        WHERE user_id = #{userId};
+    </select>
+
+    <select id="getUserSalt" parameterType="String" resultType="string">
         SELECT salt FROM users
         WHERE user_id= #{userId};
     </select>
 
-    <select id="loginMemberSalt" parameterType="map"
-            resultMap="userResultMap">
+    <select id="login" parameterType="map" resultMap="userResultMap">
         SELECT user_id, user_name, email, join_date, profile
         FROM users
         WHERE user_id= #{userId} AND user_password= #{userPassword};
     </select>
-
-    <update id="modifyUser" parameterType="user">
-        UPDATE users
-        SET user_name=#{userName}, email = #{email}
-        WHERE user_id =#{userId} AND user_password=#{userPassword};
-    </update>
 
     <select id="findPw" parameterType="user" resultType="int">
         SELECT COUNT(*) AS COUNT
@@ -52,18 +61,7 @@
         WHERE user_id= #{userId} AND email = #{email};
     </select>
 
-    <delete id="deleteMember" parameterType="user">
-        DELETE FROM users WHERE user_id=#{userId};
-    </delete>
-
-    <select id="getMember" parameterType="string"
-            resultMap="userResultMap">
-        select user_id, user_name, email, join_date, profile
-        from users
-        where user_id = #{userId}
-    </select>
-
-    <select id="searchMember" parameterType="string" resultMap="userResultMap">
+    <select id="searchUser" parameterType="string" resultMap="userResultMap">
         select user_id, user_name, email, join_date, profile
         from users
         where user_id like CONCAT('%', #{userId}, '%')

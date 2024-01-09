@@ -2,7 +2,7 @@ package edu.ssafy.enjoytrip.response.code;
 
 import org.springframework.http.HttpStatus;
 
-public interface ErrorCode {
+public interface ResponseCode {
 	String name();
 	HttpStatus getHttpStatus();
 	String getMessage();

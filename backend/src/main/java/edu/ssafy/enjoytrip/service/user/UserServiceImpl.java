@@ -10,9 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import edu.ssafy.enjoytrip.response.code.CommonErrorCode;
-import edu.ssafy.enjoytrip.response.code.CustomErrorCode;
+import edu.ssafy.enjoytrip.response.code.CommonResponseCode;
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import edu.ssafy.enjoytrip.dto.user.UserDto;
@@ -27,62 +28,73 @@ public class UserServiceImpl implements UserService {
     private final BoardMapper BoardMapper;
 
     @Override
-    public Optional<UserDto> findById(String userId) {
-        return userMapper.findById(userId);
+    public UserDto findById(String userId) {
+        return userMapper.findById(userId)
+                .orElseThrow(()-> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
     }
 
     @Override
-    public void createUser(UserDto memberDto) {
+    public void createUser(UserDto dto) {
         byte[] salt = getSalt();
 
-        byte[] byteDigestPsw = getSaltHashSHA512(memberDto.getUserPassword(), salt);
+        byte[] byteDigestPsw = getSaltHashSHA512(dto.getUserPassword(), salt);
         String strDigestPsw = toHex(byteDigestPsw);
         String strSalt = toHex(salt);
 
-        memberDto.setUserPassword(strDigestPsw);
-        memberDto.setSalt(strSalt);
+        dto.setUserPassword(strDigestPsw);
+        dto.setSalt(strSalt);
 
-        userMapper.createUser(memberDto);
-    }
-
-    @Override
-    public UserDto loginMember(String userId, String userPwd) throws Exception {
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("userId", userId);
-        map.put("userPassword", userPwd);
-        // 에러 핸들링
-        UserDto dto = userMapper.getSaltMember(map);
-        byte[] salt = null;
-        String strSalt = dto.getSalt();
-        salt = fromHex(strSalt);
-        byte[] byteDigestPsw = getSaltHashSHA512(userPwd, salt);
-        String strDigestPsw = toHex(byteDigestPsw);
-
-        map.put("userPassword", strDigestPsw);
-        // 에러 핸들링
-        UserDto result = userMapper.loginMemberSalt(map);
-        return result;
-    }
-
-    @Override
-    public boolean modifyUser(UserDto dto) {
-        byte[] salt = null;
-        UserDto temp = null;
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("userId", dto.getUserId());
         try {
-            temp = userMapper.getSaltMember(map);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            userMapper.createUser(dto);
+        } catch (DataIntegrityViolationException e) {
+            throw new RestApiException(CustomResponseCode.INVALID_USER_INFO);
         }
-        String strSalt = temp.getSalt();
-        salt = fromHex(strSalt);
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+        int cnt = userMapper.deleteUser(userId);
+
+        if(cnt == 0) {
+            throw new RestApiException(CustomResponseCode.USER_NOT_FOUND);
+        }
+    }
+
+    @Override
+    public UserDto login(UserDto dto) {
+        String strSalt = Optional.of(userMapper.getUserSalt(dto.getUserId()))
+                .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
+
+        byte[] salt = fromHex(strSalt);
         byte[] byteDigestPsw = getSaltHashSHA512(dto.getUserPassword(), salt);
         String strDigestPsw = toHex(byteDigestPsw);
 
         dto.setUserPassword(strDigestPsw);
-        dto.setSalt(strSalt);
-        return userMapper.modifyUser(dto);
+
+        return userMapper.login(dto)
+                .orElseThrow(() -> new RestApiException(CommonResponseCode.UNAUTHORIZED_REQUEST));
+    }
+
+    @Override
+    public UserDto modifyUser(UserDto dto) {
+        String strSalt = Optional.of(userMapper.getUserSalt(dto.getUserId()))
+                .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
+
+        byte[] salt = fromHex(strSalt);
+        byte[] byteDigestPsw = getSaltHashSHA512(dto.getUserPassword(), salt);
+        String strDigestPsw = toHex(byteDigestPsw);
+
+        dto.setUserPassword(strDigestPsw);
+        userMapper.modifyUser(dto);
+        return userMapper.findById(dto.getUserId())
+                .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public void checkById(String userId) {
+        if(userMapper.checkById(userId) != null) {
+            throw new RestApiException(CustomResponseCode.INVALID_USER_ID);
+        }
     }
 
     @Override
@@ -90,23 +102,12 @@ public class UserServiceImpl implements UserService {
         return userMapper.findPw(dto);
     }
 
-    @Override
-    public boolean deleteMember(UserDto dto) {
-        return userMapper.deleteMember(dto);
-
-    }
-
-    @Override
-    public UserDto getMember(String userId) {
-        return userMapper.getMember(userId);
-    }
-
     private byte[] getSaltHashSHA512(String userPassword, byte[] salt) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-512");
         } catch (NoSuchAlgorithmException e) {
-            throw new RestApiException(CustomErrorCode.PASSWORD_NOT_CREATED);
+            throw new RestApiException(CustomResponseCode.PASSWORD_NOT_CREATED);
         }
         md.update(salt);
         byte[] byteData = md.digest(userPassword.getBytes());
@@ -119,7 +120,7 @@ public class UserServiceImpl implements UserService {
         try {
             sr = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException e) {
-            throw new RestApiException(CustomErrorCode.PASSWORD_NOT_CREATED);
+            throw new RestApiException(CustomResponseCode.PASSWORD_NOT_CREATED);
         }
         byte[] salt = new byte[16];
         sr.nextBytes(salt);
@@ -147,8 +148,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> searchMember(String userId) {
-        return userMapper.searchMember(userId);
+    public List<UserDto> searchUser(String userId) {
+        List<UserDto> userList = userMapper.searchUser(userId);
+
+        if(userList == null || userList.isEmpty()) {
+            throw new RestApiException(CustomResponseCode.USER_NOT_FOUND);
+        }
+        return userList;
     }
 
     @Override

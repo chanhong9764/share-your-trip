@@ -15,15 +15,15 @@ import org.apache.ibatis.jdbc.SQL;
 public interface UserMapper {
 
 	Optional<UserDto> findById(String userId);
-	void createUser(UserDto memberDto);
-	UserDto getSaltMember(Map<String, String> map) throws SQLException;
-	boolean modifyUser(UserDto dto);
+	void createUser(UserDto dto);
+	String getUserSalt(String userId);
+	int modifyUser(UserDto dto);
+	String checkById(String userId);
 	int findPw(UserDto dto);
 	String findId(String email);
 	void changePwd(UserDto dto);
-	boolean deleteMember(UserDto dto);
-	UserDto loginMemberSalt(Map<String, String> map);
-	UserDto getMember(String userId);
-	List<UserDto> searchMember(String userId);
+	int deleteUser(String userId);
+	Optional<UserDto> login(UserDto dto);
+	List<UserDto> searchUser(String userId);
 	void changeProfile(UserDto userDto);
 }
