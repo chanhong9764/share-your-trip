@@ -1,5 +1,6 @@
 package edu.ssafy.enjoytrip.response.handler;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
@@ -23,21 +24,27 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	
-	// RestApiException 예외 처리
+	/**
+	 * RestApiException 예외 처리
+	 */
 	@ExceptionHandler(RestApiException.class)
-    public ResponseEntity<Object> handleQuizException(final RestApiException e) {
+    public ResponseEntity<Object> handleRestApiException(final RestApiException e) {
         final ErrorCode errorCode = e.getErrorCode();
         return handleExceptionInternal(errorCode);
     }
 
-    // 잘못된 파라미터를 넘겼을 경우 처리
+    /**
+     * 비즈니스 로직 수행 도중, 사용자의 요청 파라미터가 적절하지 않을 때 발생
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleIllegalArgument(final IllegalArgumentException e) {
         final ErrorCode errorCode = CommonErrorCode.INVALID_PARAMETER;
         return handleExceptionInternal(errorCode, e.getMessage());
     }
 
-    // Valid에 의한 유효성 검증 실패, 잘못된 파라미터 입력 처리
+    /**
+     * javax.validation.Valid or @Validated 으로 binding error 발생시 발생
+     */
     @Override
     public ResponseEntity<Object> handleMethodArgumentNotValid(
             final MethodArgumentNotValidException e,
@@ -48,32 +55,30 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(e, errorCode);
     }
 
-    // 선언한 예외 외의 모든 것을 처리
-    @ExceptionHandler({Exception.class})
-    public ResponseEntity<Object> handleAllException(final Exception ex) {
+    /**
+     * 선언한 예외 외의 모든 것을 처리
+     */
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handleAllException(final Exception e) {
         final ErrorCode errorCode = CommonErrorCode.INTERNAL_SERVER_ERROR;
         return handleExceptionInternal(errorCode);
     }
 
-    // 응답 객체 반환
     private ResponseEntity<Object> handleExceptionInternal(final ErrorCode errorCode) {
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(makeErrorResponse(errorCode));
     }
-    
-    // 응답 객체 반환
+
     private ResponseEntity<Object> handleExceptionInternal(final ErrorCode errorCode, final String message) {
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(makeErrorResponse(errorCode, message));
     }
-    
-    // 응답 객체 반환
+
     private ResponseEntity<Object> handleExceptionInternal(final BindException e, final ErrorCode errorCode) {
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(makeErrorResponse(e, errorCode));
     }
 
-    // 응답 객체 생성 함수
     private ErrorResponse makeErrorResponse(final ErrorCode errorCode) {
         return ErrorResponse.builder()
                 .code(errorCode.name())
@@ -81,15 +86,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 .build();
     }
 
-    // 응답 객체 생성 함수
     private ErrorResponse makeErrorResponse(final ErrorCode errorCode, final String message) {
         return ErrorResponse.builder()
                 .code(errorCode.name())
                 .message(message)
                 .build();
     }
-    
-    // (valid 예외 처리) 응답 객체 생성 함수
+
     private ErrorResponse makeErrorResponse(final BindException e, final ErrorCode errorCode) {
         final List<ErrorResponse.ValidationError> validationErrorList = e.getBindingResult()
                 .getFieldErrors()

@@ -1,10 +1,15 @@
 package edu.ssafy.enjoytrip.controller.user;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,19 +43,11 @@ public class UserController {
 	private final UserService service;
 
 	@PostMapping
-	public ResponseEntity<Map<String, Object>> CreateUser(@RequestBody UserDto dto) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		try {
-			int res = service.joinMember(dto);
-			map.put("resmsg", "입력성공");
-			map.put("resdata", res);
-		} catch (Exception e) {
-			e.printStackTrace();
-			map.put("resmsg", "입력실패");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity(map, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> CreateUser(@RequestBody UserDto dto) {
+		// 테스트해보고 오류 어떻게 확인하고 에러 처리
+		service.createUser(dto);
+
+		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER);
 	}
 
 	@PutMapping
@@ -135,14 +132,10 @@ public class UserController {
 	}
 
 	@GetMapping("/check/{userid}")
-	public ResponseEntity<Object> CheckId(@PathVariable("userid") String userId) throws Exception {
-		Map<String, Object> map = new HashMap();
+	public ResponseEntity<Object> CheckId(@PathVariable("userid") String userId) {
 		UserDto user = service.findById(userId)
 				.orElseThrow(() -> new RestApiException(CustomErrorCode.USER_NOT_FOUND));
-		map.put("message", "중복되는 ID입니다.");
-		map.put("result", user);
-		
-		return new ResponseEntity<>(map, HttpStatus.OK);
+		return SuccessResponse.createSuccess(SuccessCode.LOGIN_SUCCESS, user);
 	}
 
 	@GetMapping("/findId/{email}")
