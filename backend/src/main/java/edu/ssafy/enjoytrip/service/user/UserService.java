@@ -9,8 +9,8 @@ import edu.ssafy.enjoytrip.dto.user.UserDto;
 public interface UserService {
 
 	// 유저 ID를 이용하여 사용자 검색
-	Optional<UserDto> findById(String userId) throws Exception;
-	int joinMember(UserDto memberDto) throws Exception;
+	Optional<UserDto> findById(String userId);
+	void createUser(UserDto memberDto);
 	UserDto loginMember(String userId, String userPwd) throws Exception;
 	boolean modifyUser(UserDto dto);
 	int findPw(UserDto dto);

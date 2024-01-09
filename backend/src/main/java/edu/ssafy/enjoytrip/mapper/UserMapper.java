@@ -9,12 +9,13 @@ import org.apache.catalina.User;
 import org.apache.ibatis.annotations.Mapper;
 
 import edu.ssafy.enjoytrip.dto.user.UserDto;
+import org.apache.ibatis.jdbc.SQL;
 
 @Mapper
 public interface UserMapper {
 
 	Optional<UserDto> findById(String userId);
-	int joinMember(UserDto memberDto) throws SQLException;
+	void createUser(UserDto memberDto);
 	UserDto getSaltMember(Map<String, String> map) throws SQLException;
 	boolean modifyUser(UserDto dto);
 	int findPw(UserDto dto);

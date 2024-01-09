@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import edu.ssafy.enjoytrip.response.code.CommonErrorCode;
+import edu.ssafy.enjoytrip.response.code.CustomErrorCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import org.springframework.stereotype.Service;
 
 import edu.ssafy.enjoytrip.dto.user.UserDto;
@@ -20,150 +23,148 @@ import lombok.RequiredArgsConstructor;
 @Service("UserServiceImpl")
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-	private final UserMapper userMapper;
-	private final BoardMapper BoardMapper;
+    private final UserMapper userMapper;
+    private final BoardMapper BoardMapper;
 
-	@Override
-	public Optional<UserDto> findById(String userId) {
-		return userMapper.findById(userId);
-	}
+    @Override
+    public Optional<UserDto> findById(String userId) {
+        return userMapper.findById(userId);
+    }
 
-	@Override
-	public int joinMember(UserDto memberDto) throws Exception {
-		byte[] salt = null;
-		// 에러 핸들링
-		try {
-			salt = getSalt();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
-		// 멤버 에러 핸들링?
-		byte[] byteDigestPsw = getSaltHashSHA512(memberDto.getUserPassword(), salt);
-		String strDigestPsw = toHex(byteDigestPsw);
-		String strSalt = toHex(salt);
+    @Override
+    public void createUser(UserDto memberDto) {
+        byte[] salt = getSalt();
 
-		memberDto.setUserPassword(strDigestPsw);
-		memberDto.setSalt(strSalt);
-		// 여기도 에러 핸들링?
-		return userMapper.joinMember(memberDto);
-	}
+        byte[] byteDigestPsw = getSaltHashSHA512(memberDto.getUserPassword(), salt);
+        String strDigestPsw = toHex(byteDigestPsw);
+        String strSalt = toHex(salt);
 
-	@Override
-	public UserDto loginMember(String userId, String userPwd) throws Exception {
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("userId", userId);
-		map.put("userPassword", userPwd);
-		// 에러 핸들링
-		UserDto dto = userMapper.getSaltMember(map);
-		byte[] salt = null;
-		String strSalt = dto.getSalt();
-		salt = fromHex(strSalt);
-		byte[] byteDigestPsw = getSaltHashSHA512(userPwd, salt);
-		String strDigestPsw = toHex(byteDigestPsw);
+        memberDto.setUserPassword(strDigestPsw);
+        memberDto.setSalt(strSalt);
 
-		map.put("userPassword", strDigestPsw);
-		// 에러 핸들링
-		UserDto result = userMapper.loginMemberSalt(map);
-		return result;
-	}
+        userMapper.createUser(memberDto);
+    }
 
-	@Override
-	public boolean modifyUser(UserDto dto) {
-		byte[] salt = null;
-		UserDto temp = null;
-		Map<String, String> map = new HashMap<String, String>();
-		map.put("userId", dto.getUserId());
-		try {
-			temp = userMapper.getSaltMember(map);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		String strSalt = temp.getSalt();
-		salt = fromHex(strSalt);
-		byte[] byteDigestPsw = getSaltHashSHA512(dto.getUserPassword(), salt);
-		String strDigestPsw = toHex(byteDigestPsw);
+    @Override
+    public UserDto loginMember(String userId, String userPwd) throws Exception {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("userId", userId);
+        map.put("userPassword", userPwd);
+        // 에러 핸들링
+        UserDto dto = userMapper.getSaltMember(map);
+        byte[] salt = null;
+        String strSalt = dto.getSalt();
+        salt = fromHex(strSalt);
+        byte[] byteDigestPsw = getSaltHashSHA512(userPwd, salt);
+        String strDigestPsw = toHex(byteDigestPsw);
 
-		dto.setUserPassword(strDigestPsw);
-		dto.setSalt(strSalt);
-		return userMapper.modifyUser(dto);
-	}
+        map.put("userPassword", strDigestPsw);
+        // 에러 핸들링
+        UserDto result = userMapper.loginMemberSalt(map);
+        return result;
+    }
 
-	@Override
-	public int findPw(UserDto dto) {
-		return userMapper.findPw(dto);
-	}
+    @Override
+    public boolean modifyUser(UserDto dto) {
+        byte[] salt = null;
+        UserDto temp = null;
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("userId", dto.getUserId());
+        try {
+            temp = userMapper.getSaltMember(map);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        String strSalt = temp.getSalt();
+        salt = fromHex(strSalt);
+        byte[] byteDigestPsw = getSaltHashSHA512(dto.getUserPassword(), salt);
+        String strDigestPsw = toHex(byteDigestPsw);
 
-	@Override
-	public boolean deleteMember(UserDto dto) {
-		return userMapper.deleteMember(dto);
+        dto.setUserPassword(strDigestPsw);
+        dto.setSalt(strSalt);
+        return userMapper.modifyUser(dto);
+    }
 
-	}
+    @Override
+    public int findPw(UserDto dto) {
+        return userMapper.findPw(dto);
+    }
 
-	@Override
-	public UserDto getMember(String userId) {
-		return userMapper.getMember(userId);
-	}
+    @Override
+    public boolean deleteMember(UserDto dto) {
+        return userMapper.deleteMember(dto);
 
-	private byte[] getSaltHashSHA512(String userPwd, byte[] salt) {
-		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-512");
-			md.update(salt);
-			byte[] byteData = md.digest(userPwd.getBytes());
-			md.reset();
-			return byteData;
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
+    }
 
-	private byte[] getSalt() throws NoSuchAlgorithmException {
-		SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-		byte[] salt = new byte[16];
-		sr.nextBytes(salt);
-		return salt;
-	}
+    @Override
+    public UserDto getMember(String userId) {
+        return userMapper.getMember(userId);
+    }
 
-	public byte[] fromHex(String hex) {
-		byte[] binary = new byte[hex.length() / 2];
-		for (int i = 0; i < binary.length; i++) {
-			binary[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
-		}
-		return binary;
-	}
+    private byte[] getSaltHashSHA512(String userPassword, byte[] salt) {
+        MessageDigest md = null;
+        try {
+            md = MessageDigest.getInstance("SHA-512");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RestApiException(CustomErrorCode.PASSWORD_NOT_CREATED);
+        }
+        md.update(salt);
+        byte[] byteData = md.digest(userPassword.getBytes());
+        md.reset();
+        return byteData;
+    }
 
-	public String toHex(byte[] array) {
-		BigInteger bi = new BigInteger(1, array);
-		String hex = bi.toString(16);
-		int paddingLength = (array.length * 2) - hex.length();
-		if (paddingLength > 0) {
-			return String.format("%0" + paddingLength + "d", 0) + hex;
-		} else {
-			return hex;
+    private byte[] getSalt() {
+        SecureRandom sr = null;
+        try {
+            sr = SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RestApiException(CustomErrorCode.PASSWORD_NOT_CREATED);
+        }
+        byte[] salt = new byte[16];
+        sr.nextBytes(salt);
+        return salt;
+    }
 
-		}
-	}
-	
-	@Override
-	public List<UserDto> searchMember(String userId) {
-		return userMapper.searchMember(userId);
-	}
+    public byte[] fromHex(String hex) {
+        byte[] binary = new byte[hex.length() / 2];
+        for (int i = 0; i < binary.length; i++) {
+            binary[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+        }
+        return binary;
+    }
 
-	@Override
-	public String findId(String email) {
-		return userMapper.findId(email);
-	}
+    public String toHex(byte[] array) {
+        BigInteger bi = new BigInteger(1, array);
+        String hex = bi.toString(16);
+        int paddingLength = (array.length * 2) - hex.length();
+        if (paddingLength > 0) {
+            return String.format("%0" + paddingLength + "d", 0) + hex;
+        } else {
+            return hex;
 
-	@Override
-	public void changePwd(UserDto dto) {
-		// TODO Auto-generated method stub
-		
-	}
-	
-	@Override
-	public void changeProfile(UserDto userDto) {
-		System.out.println(userDto);
-		userMapper.changeProfile(userDto);
-	}
+        }
+    }
+
+    @Override
+    public List<UserDto> searchMember(String userId) {
+        return userMapper.searchMember(userId);
+    }
+
+    @Override
+    public String findId(String email) {
+        return userMapper.findId(email);
+    }
+
+    @Override
+    public void changePwd(UserDto dto) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void changeProfile(UserDto userDto) {
+        System.out.println(userDto);
+        userMapper.changeProfile(userDto);
+    }
 }
