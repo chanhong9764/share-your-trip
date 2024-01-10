@@ -5,7 +5,7 @@
 
 
 <mapper namespace="edu.ssafy.enjoytrip.mapper.TripMapper">
-	<resultMap type="tripdto" id="tripResultMap">
+	<resultMap type="trip" id="tripResultMap">
 		<result column="trip_info_id" property="trip_info_id"/>
 		<result column="y" property="y"/>
 		<result column="x" property="x"/>
@@ -31,7 +31,7 @@
 		where trip_info_id = #{tripInfoId}
 	</delete>
 	
-	<insert id="SelectTrip" parameterType="tripdto">
+	<insert id="SelectTrip" parameterType="trip">
 		insert into trip_info(y, x, road_address_name, sequense, category, room_id, place_name, place_url, phone)
 		values(#{y}, #{x}, #{road_address_name}, #{sequense, jdbcType=INTEGER}, #{category, jdbcType=VARCHAR}, #{roomId}, #{place_name}, #{place_url, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR})
 		<selectKey resultType="int" keyProperty="trip_info_id" order="AFTER">
@@ -39,7 +39,7 @@
 		</selectKey>
 	</insert>
 	
-	<update id="updateSelectedList" parameterType="tripdto">
+	<update id="updateSelectedList" parameterType="trip">
 		update trip_info set sequense = #{sequense}
 		where trip_info_id = #{trip_info_id}
 	</update>

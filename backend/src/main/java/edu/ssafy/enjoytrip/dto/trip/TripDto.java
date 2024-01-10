@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Alias("tripdto")
+@Alias("trip")
 public class TripDto {
 	private int trip_info_id;
 	private String y;

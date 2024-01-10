@@ -17,8 +17,8 @@
     </resultMap>
 
     <insert id="createUser" parameterType="user">
-        insert into users(user_id, user_password, user_name, email, join_date, salt, profile)
-        values(#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{salt}, #{profile})
+        INSERT into users(user_id, user_password, user_name, email, join_date, salt, profile)
+        VALUES (#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{salt}, #{profile})
     </insert>
 
     <update id="modifyUser" parameterType="user">
@@ -33,14 +33,14 @@
     </delete>
 
     <select id="findById" parameterType="String" resultMap="userResultMap">
-        select user_id, user_name, email, join_date, profile
-        from users
+        SELECT user_id, user_name, email, join_date, profile
+        FROM users
         WHERE user_id = #{userId};
     </select>
 
     <select id="checkById" parameterType="String" resultType="string">
-        select user_id
-        from users
+        SELECT user_id
+        FROM users
         WHERE user_id = #{userId};
     </select>
 
@@ -55,30 +55,27 @@
         WHERE user_id= #{userId} AND user_password= #{userPassword};
     </select>
 
-    <select id="findPw" parameterType="user" resultType="int">
-        SELECT COUNT(*) AS COUNT
-        FROM users
-        WHERE user_id= #{userId} AND email = #{email};
-    </select>
-
     <select id="searchUser" parameterType="string" resultMap="userResultMap">
-        select user_id, user_name, email, join_date, profile
-        from users
-        where user_id like CONCAT('%', #{userId}, '%')
+        SELECT user_id, user_name, email, join_date, profile
+        FROM users
+        WHERE user_id like CONCAT('%', #{userId}, '%')
     </select>
 
-    <select id="findId" parameterType="String" resultType="String">
+    <select id="FindByEmail" parameterType="String" resultType="String">
         SELECT user_id
         FROM users
         WHERE email = #{email};
     </select>
 
-    <select id="changePwd" parameterType="String">
-        <!-- 패스워드 변경 -->
-    </select>
+    <update id="changePassword" parameterType="user">
+        UPDATE users
+        SET user_password = #{userPassword}
+        WHERE user_id = #{userId}
+    </update>
 
     <update id="changeProfile" parameterType="user">
-        update users set profile = #{profile}
-        where user_id = #{userId}
+        UPDATE users
+        SET profile = #{profile}
+        WHERE user_id = #{userId}
     </update>
 </mapper>

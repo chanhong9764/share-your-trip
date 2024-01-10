@@ -14,10 +14,10 @@ public interface UserService {
 	UserDto login(UserDto dto);
 	UserDto modifyUser(UserDto dto);
 	void checkById(String userId);
-	int findPw(UserDto dto);
+	int SendEmail(String email);
 	void deleteUser(String userId);
-	String findId(String email);
-	void changePwd(UserDto dto);
+	String FindByEmail(String email);
+	void ChangePassword(UserDto dto);
 	List<UserDto> searchUser(String userId);
 	void changeProfile(UserDto dto);
 }

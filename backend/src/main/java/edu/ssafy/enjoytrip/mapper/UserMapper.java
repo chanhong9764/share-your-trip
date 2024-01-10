@@ -19,11 +19,10 @@ public interface UserMapper {
 	String getUserSalt(String userId);
 	int modifyUser(UserDto dto);
 	String checkById(String userId);
-	int findPw(UserDto dto);
-	String findId(String email);
-	void changePwd(UserDto dto);
+	Optional<String> FindByEmail(String email);
+	int changePassword(UserDto dto);
 	int deleteUser(String userId);
 	Optional<UserDto> login(UserDto dto);
 	List<UserDto> searchUser(String userId);
-	void changeProfile(UserDto userDto);
+	int changeProfile(UserDto userDto);
 }

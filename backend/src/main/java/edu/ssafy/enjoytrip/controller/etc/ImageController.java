@@ -4,6 +4,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -27,11 +31,18 @@ public class ImageController {
 	private String uploadPath;
 	
 	@GetMapping("/{date}/{imagepath}")
-	public ResponseEntity<byte[]> getImageFile(@PathVariable("imagepath") String imagepath, @PathVariable("date") String date) throws IOException {
-		InputStream imageStream = new FileInputStream(uploadPath + "/" + date + "/"+ imagepath);
-		byte[] imageByteArray = IOUtils.toByteArray(imageStream);
-		imageStream.close();
-		return new ResponseEntity<byte[]>(imageByteArray, HttpStatus.OK);
+	public ResponseEntity<byte[]> getImageFile(@PathVariable("imagepath") String imagepath, @PathVariable("date") String date) {
+		byte[] imageByteArray = null;
+		try {
+			InputStream imageStream = new FileInputStream(uploadPath + "/" + date + "/" + imagepath);
+			imageByteArray = IOUtils.toByteArray(imageStream);
+			imageStream.close();
+		} catch (IOException e) {
+			throw new RestApiException(CustomResponseCode.IMAGE_NOT_FOUND);
+		}
+		return new ResponseEntity<>(imageByteArray, HttpStatus.OK);
+		// 테스트하고 코드 수정
+		//return SuccessResponse.createSuccess(SuccessCode.LOAD_IMAGE_SUCCESS, imageByteArray);
 	}
 }
 
