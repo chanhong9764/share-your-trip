@@ -12,6 +12,6 @@ public interface TripMapper {
 	void SelectTrip(TripDto tripDto) throws Exception;
 	void deleteTrip(String tripInfoId) throws Exception;
 	int changeTrip(TripDto tripDto) throws Exception;
-	ArrayList<TripDto> getTrip(String roomId) throws Exception;
+	ArrayList<TripDto> getTrip(String roomId);
 	void updateSelectedList(TripDto tripDto) throws Exception;
 }

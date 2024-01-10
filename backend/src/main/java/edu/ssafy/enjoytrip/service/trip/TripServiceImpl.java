@@ -2,6 +2,8 @@ package edu.ssafy.enjoytrip.service.trip;
 
 import java.util.ArrayList;
 
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Service;
@@ -31,8 +33,12 @@ public class TripServiceImpl implements TripService {
 	}
 	
 	@Override
-	public ArrayList<TripDto> getTrip(String roomId) throws Exception {
-		return tripMapper.getTrip(roomId);
+	public ArrayList<TripDto> getTrip(String roomId) {
+		ArrayList<TripDto> list = tripMapper.getTrip(roomId);
+		if(list == null || list.isEmpty()) {
+			throw new RestApiException(CustomResponseCode.TRIP_LIST_NOT_FOUND);
+		}
+		return list;
 	}
 	
 	@Override
