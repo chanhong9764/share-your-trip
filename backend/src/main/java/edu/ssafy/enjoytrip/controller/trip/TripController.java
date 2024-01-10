@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,18 +35,10 @@ public class TripController {
 	private final TripService service;
 	
 	@GetMapping("/{roomId}")
-	private ResponseEntity<Map<String, Object>> GetTrip(@PathVariable("roomId") String roomId) {
-		Map<String,Object> map= new HashMap<String,Object>();
-		try {
-			ArrayList<TripDto> triplist = service.getTrip(roomId);
-			map.put("result", triplist);
-			map.put("msg", "조회성공");
-		} catch (Exception e) {
-			map.put("result", "조회실패");
-			map.put("msg", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map,HttpStatus.OK);
-		return res;
+	private ResponseEntity<Object> GetTrip(@PathVariable("roomId") String roomId) {
+		ArrayList<TripDto> list = service.getTrip(roomId);
+
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_LIST_TRIP_SUCCESS, list);
 	}
 
 }

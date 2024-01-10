@@ -6,19 +6,11 @@ import java.util.*;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
@@ -45,7 +37,7 @@ public class UserController {
 		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER_SUCCESS);
 	}
 
-	@PutMapping
+	@PatchMapping
 	public ResponseEntity<Object> ModifyUser(@RequestBody UserDto dto) {
 		UserDto user = service.modifyUser(dto);
 		return SuccessResponse.createSuccess(SuccessCode.MODIFY_USER_SUCCESS, user);
@@ -82,28 +74,30 @@ public class UserController {
 		return SuccessResponse.createSuccess(SuccessCode.VALID_USER_ID_SUCCESS);
 	}
 
-	@GetMapping("/findId/{email}")
-	public ResponseEntity<Map<String, Object>> FindId(@PathVariable("email") String email) {
-		Map<String, Object> map = new HashMap();
-		try {
-			System.out.println("아이디 찾기 오냐? : " + email);
-			String mail = service.findId(email);
-			map.put("msg", "아이디 찾기 성공!");
-			map.put("resdata", mail);
-		} catch (Exception e) {
-			map.put("resmsg", "중복확인불가");
-			map.put("resdata", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity<>(map, HttpStatus.OK);
-		return res;
+	@GetMapping("/send/{email}")
+	public ResponseEntity<Object> sendMail(@PathVariable("email") String email) {
+		int authNumber = service.SendEmail(email);
+		return SuccessResponse.createSuccess(SuccessCode.SEND_USER_EMAIL_SUCCESS, authNumber);
+	}
+
+	@GetMapping("/find-id/{email}")
+	public ResponseEntity<Object> FindByEmail(@PathVariable("email") String email) {
+		String userId = service.FindByEmail(email);
+		return SuccessResponse.createSuccess(SuccessCode.FIND_USER_ID_SUCCESS, userId);
+	}
+
+	@PatchMapping("/password")
+	public ResponseEntity<Object> ChangePassword(@RequestBody UserDto dto) {
+		service.ChangePassword(dto);
+		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PASSWORD_USER_SUCCESS);
 	}
 
 	@PostMapping("/changeProfile")
-	public ResponseEntity<Map<String, Object>> changeProfile(@RequestParam("userId") String userId,
+	public ResponseEntity<Object> changeProfile(@RequestParam("userId") String userId,
 			@RequestParam(value = "images") MultipartFile images) throws Exception {
-		Map<String, Object> result = new HashMap<>();
 		UserDto userDto = new UserDto();
 		userDto.setUserId(userId);
+
 		BoardImagesDto imageInfo = new BoardImagesDto();
 		String today = new SimpleDateFormat("yyMMdd").format(new Date());
 		if (!images.isEmpty()) {
@@ -115,7 +109,7 @@ public class UserController {
 			}
 
 			String originalFileName = images.getOriginalFilename();
-			if (!originalFileName.isEmpty()) {
+			if (originalFileName != null && !originalFileName.isEmpty()) {
 				String saveFileName = UUID.randomUUID().toString()
 						+ originalFileName.substring(originalFileName.lastIndexOf('.'));
 				imageInfo.setSaveFolder(saveFolder);
@@ -125,16 +119,9 @@ public class UserController {
 			}
 		}
 		userDto.setProfile("/"+today+"/" + imageInfo.getSaveFile());
-		try {
-			service.changeProfile(userDto);
-			result.put("msg", "프로필 수정 성공!");
-			result.put("result", userDto.getProfile());
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "프로필 수정 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String, Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+
+		service.changeProfile(userDto);
+
+		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PROFILE_USER_SUCCESS, userDto.getProfile());
 	}
 }
