@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import edu.ssafy.enjoytrip.dto.comment.CommentDto;
 
 public interface CommentService {
-	ArrayList<CommentDto> getComments(int articleNo) throws SQLException;
-	int createComment(CommentDto commentDto) throws SQLException;
-	int reviseComment(CommentDto commentDto) throws SQLException;
-	int deleteComment(int commentId) throws SQLException;
+	ArrayList<CommentDto> getComments(int articleNo);
+	void createComment(CommentDto commentDto) ;
+	void deleteComment(int commentId) ;
 }

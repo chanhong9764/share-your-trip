@@ -110,7 +110,7 @@
 		</selectKey>
 	</insert>
 	
-	<select id="getParticipant" parameterType="map" resultMap="participantResultMap">
+	<select id="getParticipant" parameterType="String" resultMap="participantResultMap">
 		select u.user_id, u.user_name, u.email, u.profile 
 		from chatting_participant p
 		join users u

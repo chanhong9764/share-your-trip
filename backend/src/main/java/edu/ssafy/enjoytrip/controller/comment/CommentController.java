@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -31,53 +33,25 @@ public class CommentController {
 	private final CommentService service;
 	
 	@GetMapping("/{articleNo}")
-	public ResponseEntity<Map<String, Object>> getComments(@PathVariable("articleNo") int articleNo ) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			ArrayList<CommentDto> comments = service.getComments(articleNo);
-			result.put("msg", "댓글 불러오기 성공!");
-			result.put("result", comments);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			result.put("msg", "댓글 불러오기 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> getComments(@PathVariable("articleNo") int articleNo ) {
+		ArrayList<CommentDto> comments = service.getComments(articleNo);
+
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_COMMENT_SUCCESS, comments);
 	}
 	
 	@PostMapping
-	public ResponseEntity<Map<String, Object>> setComment(@RequestBody CommentDto commentDto) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			// 아이디 JWT에서 추출
-			service.createComment(commentDto);
-			ArrayList<CommentDto> comments = service.getComments(commentDto.getArticleNo());
-			result.put("msg", "댓글 작성 성공!");
-			result.put("result", comments);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			result.put("msg", "댓글 작성 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> setComment(@RequestBody CommentDto commentDto) {
+		service.createComment(commentDto);
+		ArrayList<CommentDto> comments = service.getComments(commentDto.getArticleNo());
+
+		return SuccessResponse.createSuccess(SuccessCode.CREATED_COMMENT_SUCCESS, comments);
 	}
 
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> delComment(@RequestParam("articleNo") int articleNo, @RequestParam("commentId") int commentId) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			service.deleteComment(commentId);
-			ArrayList<CommentDto> comments = service.getComments(articleNo);
-			result.put("msg", "댓글 삭제 성공!");
-			result.put("result", comments);
-		} catch (SQLException e) {
-			e.printStackTrace();
-			result.put("msg", "댓글 삭제 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> delComment(@RequestParam("articleNo") int articleNo, @RequestParam("commentId") int commentId) {
+		service.deleteComment(commentId);
+		ArrayList<CommentDto> comments = service.getComments(articleNo);
+
+		return SuccessResponse.createSuccess(SuccessCode.DELETE_COMMENT_SUCCESS, comments);
 	}
 }

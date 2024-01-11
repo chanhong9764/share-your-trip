@@ -6,24 +6,24 @@
 
 <mapper namespace="edu.ssafy.enjoytrip.mapper.TripMapper">
 	<resultMap type="trip" id="tripResultMap">
-		<result column="trip_info_id" property="trip_info_id"/>
+		<result column="trip_info_id" property="tripInfoId"/>
 		<result column="y" property="y"/>
 		<result column="x" property="x"/>
-		<result column="road_address_name" property="road_address_name"/>
-		<result column="sequense" property="sequense"/>
+		<result column="road_address_name" property="roadAddressName"/>
+		<result column="sequence" property="sequence"/>
 		<result column="category" property="category"/>
 		<result column="createdAt" property="createdAt"/>
 		<result column="room_id" property="roomId"/>
-		<result column="place_name" property="place_name" />
-		<result column="place_url" property="place_url"/>
+		<result column="place_name" property="placeName" />
+		<result column="place_url" property="placeUrl"/>
 		<result column="phone" property="phone"/>
 	</resultMap>
 	
 	<select id="getTrip" parameterType="String" resultMap="tripResultMap">
-		select trip_info_id, y, x, road_address_name, sequense, category, room_id, place_name, place_url, phone
+		select trip_info_id, y, x, road_address_name, sequence, category, room_id, place_name, place_url, phone
 		from trip_info
 		where room_id = #{roomId} 
-		order by sequense
+		order by sequence
 	</select>
 	
 	<delete id="deleteTrip" parameterType="String" >
@@ -31,16 +31,16 @@
 		where trip_info_id = #{tripInfoId}
 	</delete>
 	
-	<insert id="SelectTrip" parameterType="trip">
-		insert into trip_info(y, x, road_address_name, sequense, category, room_id, place_name, place_url, phone)
-		values(#{y}, #{x}, #{road_address_name}, #{sequense, jdbcType=INTEGER}, #{category, jdbcType=VARCHAR}, #{roomId}, #{place_name}, #{place_url, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR})
+	<insert id="insertTrip" parameterType="trip">
+		insert into trip_info(y, x, road_address_name, sequence, category, room_id, place_name, place_url, phone)
+		values(#{y}, #{x}, #{roadAddressName}, #{sequence, jdbcType=INTEGER}, #{category, jdbcType=VARCHAR}, #{roomId}, #{placeName}, #{placeUrl, jdbcType=VARCHAR}, #{phone, jdbcType=VARCHAR})
 		<selectKey resultType="int" keyProperty="trip_info_id" order="AFTER">
 			select last_insert_id()
 		</selectKey>
 	</insert>
 	
 	<update id="updateSelectedList" parameterType="trip">
-		update trip_info set sequense = #{sequense}
-		where trip_info_id = #{trip_info_id}
+		update trip_info set sequence = #{sequence}
+		where trip_info_id = #{tripInfoId}
 	</update>
 </mapper>
