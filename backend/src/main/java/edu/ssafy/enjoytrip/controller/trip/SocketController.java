@@ -48,16 +48,16 @@ public class SocketController {
     	messagingTemplate.convertAndSend("/sub/trip/" + roominfo.getRoomId(), roominfo);
     }
     
-    @MessageMapping("/selectTrip")
+    @MessageMapping("/insertTrip")
     public void updateTrip(TripDto tripDto) throws Exception {
     	System.out.println(tripDto);
-    	tripService.SelectTrip(tripDto);
+    	tripService.insertTrip(tripDto);
     	messagingTemplate.convertAndSend("/sub/select/" + tripDto.getRoomId(), tripDto);
     }
     
     @MessageMapping("/deleteTrip")
     public void deleteTrip(TripDto tripDto) throws Exception {
-    	tripService.deleteTrip(String.valueOf(tripDto.getTrip_info_id()));
+    	tripService.deleteTrip(String.valueOf(tripDto.getTripInfoId()));
     	messagingTemplate.convertAndSend("/sub/remove/" + tripDto.getRoomId(), tripDto);
     }
     

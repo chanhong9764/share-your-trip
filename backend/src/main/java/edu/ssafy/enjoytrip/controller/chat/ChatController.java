@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,114 +36,44 @@ public class ChatController {
 	private final ChatService service;
 	
 	@GetMapping("/{userId}")
-	public ResponseEntity<Map<String, Object>> GetChattingRoomList(@PathVariable("userId") String userId) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			ArrayList<ChattingRoomDto> chattingRoomList = service.getChattingRoomList(userId);
-			result.put("msg", "여행 그룹 리스트 불러오기 성공!");
-			result.put("result", chattingRoomList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "여행 그룹 리스트 불러오기 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> GetChattingRoomList(@PathVariable("userId") String userId) {
+		ArrayList<ChattingRoomDto> chattingRoomList = service.getChattingRoomList(userId);
+
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_ROOM_LIST_SUCCESS, chattingRoomList);
 	}
 	
 	@GetMapping
-	public ResponseEntity<Map<String, Object>> GetChattingList(@RequestParam Map<String, String> map) {
-		System.out.println(map);
-		Map<String, Object> result = new HashMap<>();
-		try {
-			ArrayList<ChattingDto> chattingList = service.getChattingList(map);
-			result.put("msg", "채팅 리스트 불러오기 성공!");
-			result.put("result", chattingList);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "채팅 리스트 불러오기 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> GetChattingList(@RequestParam Map<String, String> map) {
+		ArrayList<ChattingDto> chattingList = service.getChattingList(map);
+
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_CHATTING_LIST_SUCCESS, chattingList);
 	}
 	
 	@DeleteMapping
-	public ResponseEntity<Map<String, Object>> deleteChattingRoom(@RequestParam Map<String, Object> map) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			service.deleteChattingRoom(map);
-			result.put("msg", "채팅 리스트 불러오기 성공!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "채팅 리스트 불러오기 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> deleteChattingRoom(@RequestParam Map<String, Object> map) {
+		service.deleteChattingRoom(map);
+
+		return SuccessResponse.createSuccess(SuccessCode.DELETE_CHATTING_ROOM_SUCCESS);
 	}
 	
 	@DeleteMapping("/invitations")
-	public ResponseEntity<Map<String, Object>> deleteChattingRoomById(@RequestParam Map<String, Object> map) {
-		Map<String, Object> result = new HashMap<>();
-		System.out.println(map);
-		try {
-			service.deleteChattingRoomById(String.valueOf(map.get("participantId")));
-			result.put("msg", "채팅 리스트 불러오기 성공!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "채팅 리스트 불러오기 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> deleteChattingRoomById(@RequestParam("participantId") String participantId) {
+		service.deleteChattingRoomById(participantId);
+
+		return SuccessResponse.createSuccess(SuccessCode.DELETE_ROOM_INVITATION_SUCCESS);
 	}
-	
-	// status, roomid, userid
+
 	@PatchMapping
-	public ResponseEntity<Map<String, Object>> updateChattingRoom(@RequestBody Map<String, Object> map) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			service.updateParticipantRoomById(String.valueOf(map.get("participantId")));
-			result.put("msg", "채팅방 상태 업데이트 성공!");
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "채팅 상태 업데이트 실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> updateChattingRoom(@RequestParam("participantId") String participantId) {
+		service.updateParticipantRoomById(participantId);
+
+		return SuccessResponse.createSuccess(SuccessCode.ACCEPTED_ROOM_INVITATION_SUCCESS);
 	}
 	
 	@GetMapping("/invitations")
-	public ResponseEntity<Map<String, Object>> getInvitationsRoom(@RequestParam("userId") String userId) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			ArrayList<InvitationDto> invitation = service.getInvitation(userId);
-			result.put("msg", "초대장 불러오기 성공!");
-			result.put("result", invitation);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "초대장 불러오기  실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
-	}
-	
-	@GetMapping("/ranges")
-	public ResponseEntity<Map<String, Object>> getChattingRange(@RequestParam Map<String, Object> map) {
-		Map<String, Object> result = new HashMap<>();
-		try {
-			ArrayList<ChattingDto> chattingListRange = service.getChattingListRange(map);
-			result.put("msg", "채팅 불러오기 성공!");
-			result.put("result", chattingListRange);
-		} catch (Exception e) {
-			e.printStackTrace();
-			result.put("msg", "채팅 불러오기  실패!");
-			result.put("result", e.getMessage());
-		}
-		ResponseEntity<Map<String,Object>> res = new ResponseEntity(result, HttpStatus.OK);
-		return res;
+	public ResponseEntity<Object> getInvitationsRoom(@RequestParam("userId") String userId) {
+		ArrayList<InvitationDto> invitation = service.getInvitation(userId);
+
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_ROOM_INVITATION_SUCCESS, invitation);
 	}
 }

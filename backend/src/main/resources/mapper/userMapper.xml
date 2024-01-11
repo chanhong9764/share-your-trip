@@ -61,7 +61,7 @@
         WHERE user_id like CONCAT('%', #{userId}, '%')
     </select>
 
-    <select id="FindByEmail" parameterType="String" resultType="String">
+    <select id="findByEmail" parameterType="String" resultType="String">
         SELECT user_id
         FROM users
         WHERE email = #{email};

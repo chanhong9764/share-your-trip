@@ -9,9 +9,8 @@ import edu.ssafy.enjoytrip.dto.trip.TripDto;
 
 @Mapper
 public interface TripMapper {
-	void SelectTrip(TripDto tripDto) throws Exception;
-	void deleteTrip(String tripInfoId) throws Exception;
-	int changeTrip(TripDto tripDto) throws Exception;
+	void insertTrip(TripDto tripDto);
+	int deleteTrip(String tripInfoId);
 	ArrayList<TripDto> getTrip(String roomId);
-	void updateSelectedList(TripDto tripDto) throws Exception;
+	int updateSelectedList(TripDto tripDto);
 }

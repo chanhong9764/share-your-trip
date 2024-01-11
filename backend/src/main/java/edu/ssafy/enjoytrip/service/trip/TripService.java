@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import edu.ssafy.enjoytrip.dto.trip.TripDto;
 
 public interface TripService {
-	void SelectTrip(TripDto tripDto) throws Exception;
-	void deleteTrip(String tripInfoId) throws Exception;
-	int changeTrip(TripDto tripDto) throws Exception;
+	void insertTrip(TripDto tripDto);
+	void deleteTrip(String tripInfoId);
 	ArrayList<TripDto> getTrip(String roomId);
-	void updateSelectedList(ArrayList<TripDto> tripList) throws Exception;
+	void updateSelectedList(ArrayList<TripDto> tripList);
 }
