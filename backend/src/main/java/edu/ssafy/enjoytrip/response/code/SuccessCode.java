@@ -30,7 +30,24 @@ public enum SuccessCode implements ResponseCode {
     /*
         IMAGE
      */
-    LOAD_IMAGE_SUCCESS(HttpStatus.OK, "이미지를 조회했습니다.")
+    LOAD_IMAGE_SUCCESS(HttpStatus.OK, "이미지를 조회했습니다."),
+    
+    /*
+        COMMENT
+     */
+    LOAD_COMMENT_SUCCESS(HttpStatus.OK, "댓글을 조회했습니다."),
+    CREATED_COMMENT_SUCCESS(HttpStatus.OK, "댓글을 생성했습니다."),
+    DELETE_COMMENT_SUCCESS(HttpStatus.NO_CONTENT, "댓글을 삭제했습니다."),
+
+    /*
+        CHATTING
+     */
+    LOAD_ROOM_LIST_SUCCESS(HttpStatus.OK, "채팅방 리스트를 조회했습니다."),
+    LOAD_CHATTING_LIST_SUCCESS(HttpStatus.OK, "채팅 리스트를 조회했습니다."),
+    DELETE_CHATTING_ROOM_SUCCESS(HttpStatus.NO_CONTENT, "채팅방을 나갔습니다."),
+    DELETE_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 삭제했습니다."),
+    ACCEPTED_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 수락했습니다."),
+    LOAD_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 불러왔습니다."),
     ;
     private final HttpStatus httpStatus;
     private final String message;

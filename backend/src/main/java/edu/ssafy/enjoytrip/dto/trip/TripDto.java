@@ -11,16 +11,16 @@ import lombok.NoArgsConstructor;
 @Data
 @Alias("trip")
 public class TripDto {
-	private int trip_info_id;
+	private int tripInfoId;
 	private String y;
 	private String x;
-	private String road_address_name;
-	private int sequense;
+	private String roadAddressName;
+	private int sequence;
 	private String category;
 	private String createdAt;
 	private int roomId;
-	private String place_name;
-	private String place_url;
+	private String placeName;
+	private String placeUrl;
 	private String phone;
 }
 

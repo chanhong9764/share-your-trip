@@ -90,7 +90,10 @@ public class UserServiceImpl implements UserService {
         String strDigestPsw = toHex(byteDigestPsw);
 
         dto.setUserPassword(strDigestPsw);
-        userMapper.modifyUser(dto);
+        int cnt = userMapper.modifyUser(dto);
+        if(cnt == 0) {
+            throw new RestApiException(CustomResponseCode.USER_NOT_FOUND);
+        }
         return userMapper.findById(dto.getUserId())
                 .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
     }
@@ -120,7 +123,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String FindByEmail(String email) {
-        return userMapper.FindByEmail(email)
+        return userMapper.findByEmail(email)
                 .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
     }
 
@@ -191,7 +194,7 @@ public class UserServiceImpl implements UserService {
     private byte[] getSalt() {
         SecureRandom sr = null;
         try {
-            sr = SecureRandom.getInstance("SHA1PRNG");
+            sr = SecureRandom.getInstanceStrong();
         } catch (NoSuchAlgorithmException e) {
             throw new RestApiException(CustomResponseCode.PASSWORD_NOT_CREATED);
         }
@@ -216,7 +219,6 @@ public class UserServiceImpl implements UserService {
             return String.format("%0" + paddingLength + "d", 0) + hex;
         } else {
             return hex;
-
         }
     }
 }

@@ -6,6 +6,7 @@ import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.SqlSession;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import edu.ssafy.enjoytrip.dto.trip.TripDto;
@@ -18,18 +19,20 @@ public class TripServiceImpl implements TripService {
 	private final TripMapper tripMapper;
 	
 	@Override
-	public void SelectTrip(TripDto tripDto) throws Exception {
-		tripMapper.SelectTrip(tripDto);
+	public void insertTrip(TripDto tripDto) {
+		try {
+			tripMapper.insertTrip(tripDto);
+		} catch (DataIntegrityViolationException e) {
+			throw new RestApiException(CustomResponseCode.INVALID_TRIP_INSERT);
+		}
 	}
 
 	@Override
-	public void deleteTrip(String tripInfoId) throws Exception {
-		tripMapper.deleteTrip(tripInfoId);
-	}
-
-	@Override
-	public int changeTrip(TripDto tripDto) throws Exception {
-		return 0;
+	public void deleteTrip(String tripInfoId) {
+		int cnt = tripMapper.deleteTrip(tripInfoId);
+		if(cnt == 0) {
+			throw new RestApiException(CustomResponseCode.TRIP_NOT_FOUND);
+		}
 	}
 	
 	@Override
@@ -42,10 +45,12 @@ public class TripServiceImpl implements TripService {
 	}
 	
 	@Override
-	public void updateSelectedList(ArrayList<TripDto> tripList) throws Exception {
+	public void updateSelectedList(ArrayList<TripDto> tripList) {
 		for(TripDto t : tripList) {
-			tripMapper.updateSelectedList(t);			
+			int cnt = tripMapper.updateSelectedList(t);
+			if(cnt == 0) {
+				throw new RestApiException(CustomResponseCode.TRIP_NOT_FOUND);
+			}
 		}
-
 	}
 }
