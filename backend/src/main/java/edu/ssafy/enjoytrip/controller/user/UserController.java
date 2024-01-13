@@ -6,17 +6,13 @@ import java.util.*;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
-import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
-import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import edu.ssafy.enjoytrip.service.user.UserService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;

@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
-import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
-import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
