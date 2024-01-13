@@ -3,43 +3,36 @@ package edu.ssafy.enjoytrip.mapper;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import edu.ssafy.enjoytrip.dto.board.*;
 import org.apache.ibatis.annotations.Mapper;
-
-import edu.ssafy.enjoytrip.dto.board.BoardDto;
-import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
-import edu.ssafy.enjoytrip.dto.board.BoardResponseDto;
-import edu.ssafy.enjoytrip.dto.board.HashTagDto;
 
 @Mapper
 public interface BoardMapper {
-	void writeArticle(BoardDto boardDto) throws SQLException;
-	List<BoardResponseDto> listArticle(Map<String, Object> map) throws SQLException;
-	List<BoardResponseDto> listArticleByHashtag(Map<String, Object> map) throws SQLException;
-	BoardResponseDto getArticle(int articleNo) throws SQLException;
+	void writeArticle(BoardDto boardDto);
+	List<BoardResponseDto> listArticle(Map<String, Object> map);
+	List<BoardResponseDto> listArticleByHashtag(Map<String, Object> map);
+	BoardResponseDto getArticle(int articleNo);
 	
-	void modifyArticle(BoardDto BoardDto) throws SQLException;
-	void deleteArticle(int articleNo) throws SQLException;
+	int modifyArticle(BoardDto BoardDto);
+	int deleteArticle(int articleNo);
 	
 	// 게시글 추천
-	int setRecommend(Map<String, Object> map) throws SQLException;
-	int delRecommend(Map<String, Object> map) throws SQLException;
-	int getRecommendUser(Map<String, Object> map) throws SQLException;
-	
-	// 인기 게시글 
-	boolean deleteHotBoard() throws SQLException;
-	
+	void setRecommend(BoardDto boardDto);
+	int delRecommend(BoardDto boardDto);
+	Optional<Integer> getRecommendUser(BoardDto dto);
+
 	// 이미지 처리
-	void registerFile(BoardDto boardDto) throws Exception;
-	List<BoardImagesDto> getBoardImagesByArticleNo(int articleNo) throws Exception;
-	void removeImages(String image) throws Exception;
+	void registerFile(BoardDto boardDto);
+	List<BoardImagesDto> getBoardImagesByArticleNo(int articleNo);
+	int removeImages(String image) ;
 	
 	// 해시태그
-	Integer isExistHashTag(String tag) throws SQLException;
-	int createHashTag(HashTagDto hashTagDto) throws SQLException;
-	void createRelationHashTag(Map<String, Integer> map) throws SQLException;
-	int getHashTagId(String hashtag) throws SQLException;
-	List<HashTagDto> getHashTagByArticleNo(int articleNo) throws SQLException;
-	void removeHashTag(String tag) throws Exception;
-	List<HashTagDto> getHotHashTag() throws Exception;
+	Optional<Integer> isExistHashTag(String tag);
+	void createHashTag(HashTagDto hashTagDto);
+	void createRelationHashTag(BoardTagDto boardTagDto);
+	List<HashTagDto> getHashTagByArticleNo(int articleNo);
+	int removeHashTag(String tag);
+	List<HashTagDto> getHotHashTag();
 }

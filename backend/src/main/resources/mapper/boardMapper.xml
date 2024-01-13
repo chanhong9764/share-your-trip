@@ -92,10 +92,6 @@
 		where article_no = #{articleNo};
 	</select>
 	
-	<delete id="deleteHotBoard" >
-		delete from hot_board
-	</delete>
-	
 	<insert id="writeArticle" parameterType="boardDto">
 		insert into board (user_id, content)
 		values (#{userId}, #{content})
@@ -130,18 +126,6 @@
 		left join recommend as r
 		on t.article_no = r.article_no
 		where t.article_no = #{articleNo}
-	</select>
-	
-	<select id="getRecommendCount" parameterType="int" resultType="int">
-		select count(*)
-		from recommend
-		where article_no = #{articleNo}
-	</select>
-	
-	<select id="getRecommendUser" parameterType="map" resultType="Integer">
-		select count(*)
-		from recommend
-		where article_no = #{articleNo} and user_id = #{userId}
 	</select>
 	
 	<update id="modifyArticle" parameterType="boardDto">

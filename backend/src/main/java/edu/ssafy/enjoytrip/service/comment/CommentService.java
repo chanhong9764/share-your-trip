@@ -1,6 +1,5 @@
 package edu.ssafy.enjoytrip.service.comment;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import edu.ssafy.enjoytrip.dto.comment.CommentDto;

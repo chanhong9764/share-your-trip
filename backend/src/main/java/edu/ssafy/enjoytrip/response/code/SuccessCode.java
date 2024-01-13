@@ -48,6 +48,18 @@ public enum SuccessCode implements ResponseCode {
     DELETE_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 삭제했습니다."),
     ACCEPTED_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 수락했습니다."),
     LOAD_ROOM_INVITATION_SUCCESS(HttpStatus.NO_CONTENT, "초대장을 불러왔습니다."),
+
+    /*
+        BOARD
+     */
+    LOAD_LIST_BOARD_SUCCESS(HttpStatus.OK, "게시글 리스트를 조회했습니다."),
+    LOAD_POST_BOARD_SUCCESS(HttpStatus.OK, "게시글을 조회했습니다."),
+    CREATED_POST_BOARD_SUCCESS(HttpStatus.CREATED, "게시글을 등록하였습니다."),
+    MODIFY_POST_BOARD_SUCCESS(HttpStatus.CREATED, "게시글을 수정하였습니다."),
+    DELETE_POST_BOARD_SUCCESS(HttpStatus.CREATED, "게시글을 삭제하였습니다."),
+    CREATED_LIKE_BOARD_SUCCESS(HttpStatus.CREATED, "추천을 생성하였습니다."),
+    DELETE_LIKE_BOARD_SUCCESS(HttpStatus.CREATED, "추천을 제거하였습니다."),
+    LOAD_HOT_HASHTAG_BOARD_SUCCESS(HttpStatus.OK, "인기 해시태그를 조회했습니다."),
     ;
     private final HttpStatus httpStatus;
     private final String message;

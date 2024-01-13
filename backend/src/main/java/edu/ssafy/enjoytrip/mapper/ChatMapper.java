@@ -16,22 +16,19 @@ import edu.ssafy.enjoytrip.dto.user.UserDto;
 public interface ChatMapper {
 	// 채팅방 관련 기능들
 	ArrayList<ChattingRoomDto> getChattingRoomList(String userId);
-	ChattingRoomDto getChattingRoom(int roomId);
-	void createChattingRoom(ChattingRoomDto chattingRoomDto) throws Exception;
+	void createChattingRoom(ChattingRoomDto chattingRoomDto);
 	int deleteChattingRoom(Map<String, Object> map);
 	
 	// 채팅방 참여 기능
-	void createParticipantRoom(ChattingParticipantDto chattingParticipantDto) throws Exception;
-	int updateParticipantRoom(Map<String, Object> map) throws Exception;
+	void createParticipantRoom(ChattingParticipantDto chattingParticipantDto);
+	int updateParticipantRoom(Map<String, Object> map);
 	int updateParticipantRoomById(String participantId);
 	ArrayList<UserDto> getParticipant(int roomId);
 	ArrayList<InvitationDto> getInvitation(String userId);
 	int deleteChattingRoomById(String participantId);
-	InvitationDto getInvitationById(Map<String, Object> map) throws Exception;
+	InvitationDto getInvitationById(Map<String, Object> map);
 	
 	// 채팅 관련 기능
-	void createChatting(ChattingDto chattingDto) throws Exception;
+	void createChatting(ChattingDto chattingDto);
 	ArrayList<ChattingDto> getChattingList(Map<String, Object> map);
-	ArrayList<ChattingDto> getChattingListRange(Map<String, Object> map) throws Exception;
-	Integer getChattingId(Map<String, Object> map) throws Exception;
 }
