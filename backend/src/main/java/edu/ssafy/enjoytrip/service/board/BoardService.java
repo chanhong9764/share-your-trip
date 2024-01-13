@@ -7,24 +7,19 @@ import java.util.Map;
 import edu.ssafy.enjoytrip.dto.board.BoardDto;
 import edu.ssafy.enjoytrip.dto.board.BoardResponseDto;
 import edu.ssafy.enjoytrip.dto.board.HashTagDto;
-import edu.ssafy.enjoytrip.dto.comment.CommentDto;
-import edu.ssafy.enjoytrip.util.PageNavigation;
 
 public interface BoardService {
 
-	void writeArticle(BoardDto boardDto, String[] hashtag) throws Exception;
-	List<BoardResponseDto> listArticle(Map<String, String> map) throws Exception;
-	BoardResponseDto getArticle(Map<String, Object> map) throws Exception;
+	void writeArticle(BoardDto boardDto, String[] hashtag);
+	List<BoardResponseDto> listArticle(Map<String, String> map);
+	BoardResponseDto getArticle(BoardDto dto);
 
-	void modifyArticle(BoardDto boardDto, String[] addHashtag, String[] removeHashtag, String[] removeImages) throws Exception;
-	void deleteArticle(int articleNo) throws Exception;
+	void modifyArticle(BoardDto boardDto, String[] addHashtag, String[] removeHashtag, String[] removeImages);
+	void deleteArticle(int articleNo) ;
 	
-	int setRecommend(Map<String, Object> map) throws SQLException;
-	int delRecommend(Map<String, Object> map) throws SQLException;
-	int getRecommendUser(int articleNo, String userId) throws SQLException;
-	
-	boolean updateBoard() throws SQLException;
-	
-	List<HashTagDto> getHotHashTag() throws Exception;
+	void setRecommend(BoardDto boardDto);
+	void delRecommend(BoardDto boardDto);
+
+	List<HashTagDto> getHotHashTag();
 }
 

@@ -1,13 +1,10 @@
 package edu.ssafy.enjoytrip.service.comment;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.session.SqlSession;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 

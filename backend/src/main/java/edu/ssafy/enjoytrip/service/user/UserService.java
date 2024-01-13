@@ -1,9 +1,7 @@
 package edu.ssafy.enjoytrip.service.user;
 
 import java.util.List;
-import java.util.Optional;
 
-import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 
 public interface UserService {

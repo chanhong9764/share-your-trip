@@ -1,7 +1,6 @@
 package edu.ssafy.enjoytrip.controller.trip;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,17 +24,19 @@ public class SocketController {
 	private final SimpMessagingTemplate messagingTemplate;
 	
     @MessageMapping("/chat/message")
-    public void SocketHandler(ChattingDto chattingDto) throws Exception {
+    public void SocketHandler(ChattingDto chattingDto) {
     	service.createChatting(chattingDto);
     	messagingTemplate.convertAndSend("/sub/chat/" + chattingDto.getRoomId(), chattingDto);
     }
     
     @MessageMapping("/createRoom")
-    public void CreateRoom(ChattingRoomDto chattingRoom) throws Exception {
+    public void CreateRoom(ChattingRoomDto chattingRoom) {
     	service.createChattingRoom(chattingRoom);
+
     	String[] users = chattingRoom.getIdentifier().split(",");
     	Map<String, Object> map = new HashMap<>();
     	map.put("roomId", chattingRoom.getRoomId());
+
     	for(int i = 1; i < users.length; i++) {
     		map.put("userId", users[i]);
     		messagingTemplate.convertAndSend("/sub/" + users[i], service.getInvitationById(map));
@@ -44,25 +45,24 @@ public class SocketController {
     }
     
     @MessageMapping("/enterRoom")
-    public void EnterRoom(EnterRoomDto roominfo) throws Exception {
-    	messagingTemplate.convertAndSend("/sub/trip/" + roominfo.getRoomId(), roominfo);
+    public void EnterRoom(EnterRoomDto roomInfo) {
+    	messagingTemplate.convertAndSend("/sub/trip/" + roomInfo.getRoomId(), roomInfo);
     }
     
     @MessageMapping("/insertTrip")
-    public void updateTrip(TripDto tripDto) throws Exception {
-    	System.out.println(tripDto);
+    public void updateTrip(TripDto tripDto) {
     	tripService.insertTrip(tripDto);
     	messagingTemplate.convertAndSend("/sub/select/" + tripDto.getRoomId(), tripDto);
     }
     
     @MessageMapping("/deleteTrip")
-    public void deleteTrip(TripDto tripDto) throws Exception {
+    public void deleteTrip(TripDto tripDto){
     	tripService.deleteTrip(String.valueOf(tripDto.getTripInfoId()));
     	messagingTemplate.convertAndSend("/sub/remove/" + tripDto.getRoomId(), tripDto);
     }
     
     @MessageMapping("/updateSequence")
-    public void updateSequence(ArrayList<TripDto> selectedList) throws Exception {
+    public void updateSequence(ArrayList<TripDto> selectedList){
     	tripService.updateSelectedList(selectedList);
     	messagingTemplate.convertAndSend("/sub/sequenceUpdate/" + selectedList.get(0).getRoomId(), selectedList);
     }

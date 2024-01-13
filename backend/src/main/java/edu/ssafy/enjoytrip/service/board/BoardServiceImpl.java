@@ -2,44 +2,36 @@ package edu.ssafy.enjoytrip.service.board;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.session.SqlSession;
-
+import edu.ssafy.enjoytrip.dto.board.*;
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
+import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import edu.ssafy.enjoytrip.dto.board.BoardDto;
-import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
-import edu.ssafy.enjoytrip.dto.board.BoardResponseDto;
-import edu.ssafy.enjoytrip.dto.board.HashTagDto;
 import edu.ssafy.enjoytrip.mapper.BoardMapper;
 import edu.ssafy.enjoytrip.util.SizeConstant;
 
 @Service("BoardServiceImpl")
+@RequiredArgsConstructor
 public class BoardServiceImpl implements BoardService {
-	private BoardMapper boardMapper;
-	
-	@Autowired
-	private BoardServiceImpl(BoardMapper boardMapper) {
-		this.boardMapper = boardMapper;
-	}
-	
+	private final BoardMapper boardMapper;
+
 	@Override
-	public List<BoardResponseDto> listArticle(Map<String, String> map) throws Exception {
+	public List<BoardResponseDto> listArticle(Map<String, String> map) {
 		Map<String, Object> param = new HashMap<String, Object>();
-		
-//		if(map.get("start") != null) {
-//		
-//		}
+
 		int pgno = Integer.parseInt(map.get("pgno") == null ? "1" : map.get("pgno"));
 		int start = pgno * SizeConstant.LIST_SIZE - SizeConstant.LIST_SIZE;
-		
-		if(map.get("key") != null && !map.get("key").isEmpty()){
+
+		// 메인 페이지 인기 게시글 리스트
+		if (map.get("key") != null && !map.get("key").isEmpty()) {
 			param.put("start", 0);
 			param.put("listsize", 3);
 			param.put("type", 1);
@@ -49,196 +41,217 @@ public class BoardServiceImpl implements BoardService {
 			param.put("hashtag", map.get("hashtag"));
 			param.put("type", map.get("type"));
 		}
-		List<BoardResponseDto> list = new ArrayList<BoardResponseDto>();
-		
-		if(param.get("hashtag") != null && !((String)param.get("hashtag")).isEmpty()) {
-			list.addAll(boardMapper.listArticleByHashtag(param));
+		List<BoardResponseDto> list;
+
+		// 게시글 리스트 불러오는 부분
+		if (param.get("hashtag") != null && !((String) param.get("hashtag")).isEmpty()) {
+			list = boardMapper.listArticleByHashtag(param);
 		} else {
-			list.addAll(boardMapper.listArticle(param));
+			list = boardMapper.listArticle(param);
 		}
-		for(BoardResponseDto post : list) {
-			if(map.get("userId") != null || !map.get("userId").equals("")) {
-				Map<String, Object> temp = new HashMap<>();
-				temp.put("articleNo", post.getArticleNo());
-				temp.put("userId", map.get("userId"));
-				Integer recommendUser = boardMapper.getRecommendUser(temp);
-				if(recommendUser != 0) {
+		if (list == null || list.isEmpty()) {
+			throw new RestApiException(CustomResponseCode.BOARD_LIST_NOT_FOUND);
+		}
+
+		for (BoardResponseDto post : list) {
+			// 로그인 했을 경우
+			if (map.get("userId") != null || !map.get("userId").equals("")) {
+				BoardDto dto = new BoardDto();
+				dto.setArticleNo(post.getArticleNo());
+				dto.setUserId(map.get("userId"));
+				// 게시글마다 추천 여부 확인
+				int cnt = boardMapper.getRecommendUser(dto).orElse(0);
+				if (cnt != 0) {
 					post.setRecommend(true);
 				}
 			}
+			// 게시글 마다의 해시태그 조회
 			List<HashTagDto> hashTagList = boardMapper.getHashTagByArticleNo(post.getArticleNo());
-			
+			post.setHashtag(hashTagList);
+			// 게시글 마다의 이미지 조회
 			List<BoardImagesDto> boardImages = boardMapper.getBoardImagesByArticleNo(post.getArticleNo());
-			if(!boardImages.isEmpty()) {
-				post.setImageURL(new ArrayList<String>());
-				for(BoardImagesDto imageDto : boardImages) {
+
+			if (boardImages != null && !boardImages.isEmpty()) {
+				post.setImageURL(new ArrayList<>());
+				for (BoardImagesDto imageDto : boardImages) {
 					String[] split = imageDto.getSaveFolder().split("/");
 					String date = split[split.length - 1];
 					String filePath = "/" + date + "/" + imageDto.getSaveFile();
-			
+
 					post.getImageURL().add(filePath);
 				}
 			}
-			post.setHashtag(hashTagList);
 		}
 		return list;
 	}
-	
-	
+
+
 	@Override
-	public BoardResponseDto getArticle(Map<String, Object> map) throws Exception {
-		BoardResponseDto article = boardMapper.getArticle((int) map.get("articleNo"));
-		Integer recommendUser = boardMapper.getRecommendUser(map);
-		
-		List<HashTagDto> hashTagList = boardMapper.getHashTagByArticleNo((int)map.get("articleNo"));
-		article.setHashtag(hashTagList);
-		
-		if(recommendUser != 0) {
+	public BoardResponseDto getArticle(BoardDto dto) {
+		BoardResponseDto article = boardMapper.getArticle(dto.getArticleNo());
+		// 게시글 추천 여부 확인
+		int cnt = boardMapper.getRecommendUser(dto).orElse(0);
+		if (cnt != 0) {
 			article.setRecommend(true);
 		}
-		List<BoardImagesDto> boardImages = boardMapper.getBoardImagesByArticleNo((int) map.get("articleNo"));
-		if(!boardImages.isEmpty()) {
-			article.setImageURL(new ArrayList<String>());
-			for(BoardImagesDto imageDto : boardImages) {
+		// 게시글의 해시태그
+		List<HashTagDto> hashTagList = boardMapper.getHashTagByArticleNo(dto.getArticleNo());
+		article.setHashtag(hashTagList);
+
+		// 게시글의 이미지
+		List<BoardImagesDto> boardImages = boardMapper.getBoardImagesByArticleNo(dto.getArticleNo());
+		if (boardImages != null && !boardImages.isEmpty()) {
+			article.setImageURL(new ArrayList<>());
+			for (BoardImagesDto imageDto : boardImages) {
 				String[] split = imageDto.getSaveFolder().split("/");
 				String date = split[split.length - 1];
 				String filePath = "/" + date + "/" + imageDto.getSaveFile();
-		
+
 				article.getImageURL().add(filePath);
 			}
 		}
-		
+
 		return article;
 	}
-	
+
 	@Override
-	public void writeArticle(BoardDto boardDto, String[] hashtag) throws Exception {
-		// 게시글 처리
-		boardMapper.writeArticle(boardDto);
-		List<BoardImagesDto> images = boardDto.getImages();
-		
-		if(images != null && !images.isEmpty()) {
-			boardMapper.registerFile(boardDto);
+	public void writeArticle(BoardDto boardDto, String[] hashtag) {
+		// 게시글 저장
+		try {
+			boardMapper.writeArticle(boardDto);
+		} catch (DataIntegrityViolationException e) {
+			throw new RestApiException(CustomResponseCode.POST_NOT_CREATED);
 		}
-		
-		// 해시태그 처리
-		Map<String, Integer> map = new HashMap<>();
-		map.put("articleNo", boardDto.getArticleNo());
-		HashTagDto hashTagDto = new HashTagDto();
-		
-		for(String tag : hashtag) {
-			Integer existHashTag = boardMapper.isExistHashTag(tag);
-			if(existHashTag == null) {
-				hashTagDto.setName(tag);
-				boardMapper.createHashTag(hashTagDto);
-				map.put("hashtagId", hashTagDto.getHashtagId());
-			} else {
-				map.put("hashtagId", existHashTag);
+		List<BoardImagesDto> images = boardDto.getImages();
+
+		// 이미지 저장
+		if (images != null && !images.isEmpty()) {
+			try {
+				boardMapper.registerFile(boardDto);
+			} catch (DataIntegrityViolationException e) {
+				throw new RestApiException(CustomResponseCode.IMAGE_NOT_CREATED);
 			}
-			boardMapper.createRelationHashTag(map);
+		}
+
+		// 해시태그 처리
+		BoardTagDto boardTagDto = new BoardTagDto();
+		boardTagDto.setArticleNo(boardDto.getArticleNo());
+		HashTagDto hashTagDto = new HashTagDto();
+
+		for (String tag : hashtag) {
+			int existHashTag = boardMapper.isExistHashTag(tag).orElse(0);
+			if (existHashTag == 0) {
+				hashTagDto.setName(tag);
+				try {
+					boardMapper.createHashTag(hashTagDto);
+				} catch (DataIntegrityViolationException e) {
+					throw new RestApiException(CustomResponseCode.HASHTAG_NOT_CREATED);
+				}
+				boardTagDto.setHashTagId(hashTagDto.getHashtagId());
+			} else {
+				boardTagDto.setHashTagId(existHashTag);
+			}
+			try {
+				boardMapper.createRelationHashTag(boardTagDto);
+			} catch (DataIntegrityViolationException e) {
+				throw new RestApiException(CustomResponseCode.HASHTAG_POST_NOT_CREATED);
+			}
 		}
 	}
 
 	@Override
-	public void modifyArticle(BoardDto boardDto, String[] addHashtag, String[] removeHashtag, String[] removeImages) throws Exception {
-		// 게시글 업데이트 완료
-		boardMapper.modifyArticle(boardDto);
-		// 사진 업데이트
-		List<BoardImagesDto> images = boardDto.getImages();
-		
-		if(images != null && !images.isEmpty()) {
-			boardMapper.registerFile(boardDto);
+	public void modifyArticle(BoardDto boardDto, String[] addHashtag, String[] removeHashtag, String[] removeImages) {
+		// 게시글 업데이트
+		int cnt = boardMapper.modifyArticle(boardDto);
+		if (cnt == 0) {
+			throw new RestApiException(CustomResponseCode.POST_NOT_MODIFIED);
 		}
-		// 기존 사진 제거
-		if(removeImages != null) {
-			for(String image : removeImages) {
-				boardMapper.removeImages(image);
+
+		// 추가된 사진 삽입
+		List<BoardImagesDto> images = boardDto.getImages();
+
+		if (images != null && !images.isEmpty()) {
+			try {
+				boardMapper.registerFile(boardDto);
+			} catch (DataIntegrityViolationException e) {
+				throw new RestApiException(CustomResponseCode.IMAGE_NOT_CREATED);
 			}
 		}
-		
+		// 기존 사진 제거
+		if (removeImages != null) {
+			for (String image : removeImages) {
+				int deleteCnt = boardMapper.removeImages(image);
+				if (deleteCnt == 0) {
+					throw new RestApiException(CustomResponseCode.IMAGE_NOT_DELETED);
+				}
+			}
+		}
+
 		// 해시태그 업데이트
-		Map<String, Integer> map = new HashMap<>();
-		map.put("articleNo", boardDto.getArticleNo());
-		System.out.println(boardDto);
+		BoardTagDto boardTagDto = new BoardTagDto();
+		boardTagDto.setArticleNo(boardDto.getArticleNo());
 		HashTagDto hashTagDto = new HashTagDto();
-		
+
 		// 해시태그 추가
-		if(addHashtag != null) {
-			for(String tag : addHashtag) {
-				Integer existHashTag = boardMapper.isExistHashTag(tag);
-				if(existHashTag == null) {
+		if (addHashtag != null) {
+			for (String tag : addHashtag) {
+				int existHashTag = boardMapper.isExistHashTag(tag).orElse(0);
+				if (existHashTag == 0) {
 					hashTagDto.setName(tag);
 					boardMapper.createHashTag(hashTagDto);
-					map.put("hashtagId", hashTagDto.getHashtagId());
+					boardTagDto.setHashTagId(hashTagDto.getHashtagId());
 				} else {
-					map.put("hashtagId", existHashTag);
+					boardTagDto.setHashTagId(existHashTag);
 				}
-				boardMapper.createRelationHashTag(map);
+				try {
+					boardMapper.createRelationHashTag(boardTagDto);
+				} catch (DataIntegrityViolationException e) {
+					throw new RestApiException(CustomResponseCode.HASHTAG_POST_NOT_CREATED);
+				}
 			}
 		}
 		// 기존 해시태그 제거
-		if(removeHashtag != null) {
-			for(String tag : removeHashtag) {
-				boardMapper.removeHashTag(tag);
+		if (removeHashtag != null) {
+			for (String tag : removeHashtag) {
+				int hashTagCnt = boardMapper.removeHashTag(tag);
+				if (hashTagCnt == 0) {
+					throw new RestApiException(CustomResponseCode.HASHTAG_NOT_DELETED);
+				}
 			}
-		
 		}
 	}
 
 	@Override
-	public void deleteArticle(int articleNo) throws Exception {
-		boardMapper.deleteArticle(articleNo);
+	public void deleteArticle(int articleNo) {
+		int cnt = boardMapper.deleteArticle(articleNo);
+		if (cnt == 0) {
+			throw new RestApiException(CustomResponseCode.POST_NOT_DELETED);
+		}
 	}
 
 	@Override
-	public int delRecommend(Map<String, Object> map) throws SQLException {
-		return boardMapper.delRecommend(map);
+	public void delRecommend(BoardDto boardDto) {
+		int cnt = boardMapper.delRecommend(boardDto);
+		if (cnt == 0) {
+			throw new RestApiException(CustomResponseCode.LIKE_NOT_DELETED);
+		}
 	}
+
 	@Override
-	public int getRecommendUser(int articleNo, String userId) throws SQLException {
-		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("articleNo", articleNo);
-		map.put("userId", userId);
-		return boardMapper.getRecommendUser(map);
+	public void setRecommend(BoardDto boardDto) {
+		try {
+			boardMapper.setRecommend(boardDto);
+		} catch (DataIntegrityViolationException e) {
+			throw new RestApiException(CustomResponseCode.LIKE_NOT_CREATED);
+		}
 	}
+
 	@Override
-	public int setRecommend(Map<String, Object> map) throws SQLException {
-		return boardMapper.setRecommend(map);
+	public List<HashTagDto> getHotHashTag() {
+		List<HashTagDto> hotHashTag = boardMapper.getHotHashTag();
+		if (hotHashTag == null || hotHashTag.isEmpty()) {
+			throw new RestApiException(CustomResponseCode.HOT_HASHTAG_NOT_FOUND);
+		}
+		return hotHashTag;
 	}
-	
-	@Override
-	public List<HashTagDto> getHotHashTag() throws Exception {
-		return boardMapper.getHotHashTag();
-	}
-	
-	@Override
-	public boolean updateBoard() throws SQLException {
-//		List<BoardDto> list = boardMapper.readAllPost();
-//		List<BoardDto> HotList = pickHotPost(list);
-//		boardMapper.deleteHotBoard();
-//		try {
-//			System.out.println("HIhi");
-//			for(BoardDto b : HotList) {
-//				System.out.println(b);
-//				boardMapper.updateHotBoard(b);
-//			}
-//			return true;
-//		} catch (Exception e) {
-//			return false;
-//		}
-		return false;
-	}
-	
-//	private List<BoardDto> pickHotPost(List<BoardDto> list) {
-//		List<BoardDto> hotList = new ArrayList<BoardDto>();
-//		
-//		Collections.sort(list);
-//		
-//		//인기를 정렬하는 알고리즘 구현
-//		for (int i = 0; i < 3; i++) {
-//			hotList.add(list.get(i));
-//		}
-//		System.out.println(hotList);
-//		return hotList;
-//	}
 }

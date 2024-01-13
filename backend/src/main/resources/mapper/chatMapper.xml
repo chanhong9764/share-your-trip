@@ -42,12 +42,6 @@
 		and p.isAccepted = 1;
 	</select>
 	
-	<select id="getChattingRoom" parameterType="int" resultMap="chatResultMap">
-		select room_id, identifier, content, room_name, createdAt
-		from chatting_room
-		where room_id = #{roomId} 
-	</select>
-	
 	<insert id="createChattingRoom" parameterType="ChattingRoomDto" >
 		insert into chatting_room (identifier, content, room_name)
 		values (#{identifier}, #{content}, #{roomName})
@@ -129,28 +123,5 @@
 		        limit #{start}, #{listsize}
 		    ) t
 		    order by t.createdAt asc;
-	</select>
-	
-	<select id="getChattingListRange" parameterType="map" resultMap="chattingResultMap">
-		select * from (
-			select c.chatting_id, c.message, c.createdAt, c.room_id, u.profile, u.user_id
-			from chatting c
-			join users u
-			on c.user_id = u.user_id
-			where room_id = #{roomId}
-		    and chatting_id between #{endId} and #{startId}
-			order by createdAt desc
-		) t
-		order by t.createdAt asc;
-	</select>
-	
-	<select id="getChattingId" parameterType="map" resultType="Integer">
-		select chatting_id
-		from chatting
-		where message like CONCAT('%', #{word}, '%')
-		and room_id = #{roomId}
-		and chatting_id &lt; #{startId}
-		order by chatting_id desc
-		limit 1
 	</select>
 </mapper>

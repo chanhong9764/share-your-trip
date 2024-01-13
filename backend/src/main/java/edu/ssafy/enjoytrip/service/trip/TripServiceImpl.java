@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.session.SqlSession;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 

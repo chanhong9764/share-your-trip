@@ -7,6 +7,7 @@ import java.util.Map;
 
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
@@ -15,7 +16,6 @@ import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
 import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.mapper.ChatMapper;
-import edu.ssafy.enjoytrip.mapper.UserMapper;
 import edu.ssafy.enjoytrip.util.SizeConstant;
 import lombok.RequiredArgsConstructor;
 
@@ -45,22 +45,34 @@ public class ChatServiceImpl implements ChatService {
 	}
 	
 	@Override
-	public void createChattingRoom(ChattingRoomDto chattingRoomDto) throws Exception {
-		chatMapper.createChattingRoom(chattingRoomDto);
+	public void createChattingRoom(ChattingRoomDto chattingRoomDto) {
+		try {
+			chatMapper.createChattingRoom(chattingRoomDto);
+		} catch (DataIntegrityViolationException e) {
+			throw new RestApiException(CustomResponseCode.CHATTING_ROOM_NOT_CREATED);
+		}
 		String[] participants = chattingRoomDto.getIdentifier().split(",");
-		ChattingParticipantDto participantDto = new ChattingParticipantDto(); 
-		System.out.println(participants);
+		ChattingParticipantDto participantDto = new ChattingParticipantDto();
+
 		participantDto.setIsAccepted(0);
 		participantDto.setRoomId(chattingRoomDto.getRoomId());
+
 		for(String participant : participants) {
 			participantDto.setUserId(participant);
-			chatMapper.createParticipantRoom(participantDto);
+			try {
+				chatMapper.createParticipantRoom(participantDto);
+			} catch (DataIntegrityViolationException e) {
+				throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_ENTERED);
+			}
 		}
-		
 		Map<String, Object> map = new HashMap<>();
 		map.put("roomId", chattingRoomDto.getRoomId());
 		map.put("userId", participants[0]);
-		chatMapper.updateParticipantRoom(map);
+
+		int cnt = chatMapper.updateParticipantRoom(map);
+		if(cnt == 0) {
+			throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_ENTERED);
+		}
 	}
 	@Override
 	public void deleteChattingRoom(Map<String, Object> map) {
@@ -71,18 +83,12 @@ public class ChatServiceImpl implements ChatService {
 	}
 	
 	@Override
-	public void createParticipantRoom(ChattingParticipantDto chattingParticipantDto) throws Exception {
-		chatMapper.createParticipantRoom(chattingParticipantDto);
-	}
-	
-	@Override
-	public int updateParticipantRoom(Map<String, Object> map) throws Exception {
-		return chatMapper.updateParticipantRoom(map);
-	}
-	
-	@Override
-	public void createChatting(ChattingDto chattingDto) throws Exception {
-		chatMapper.createChatting(chattingDto);
+	public void createChatting(ChattingDto chattingDto){
+		try {
+			chatMapper.createChatting(chattingDto);
+		} catch (DataIntegrityViolationException e) {
+			throw new RestApiException(CustomResponseCode.CHATTING_NOT_CREATED);
+		}
 	}
 
 	@Override
@@ -129,7 +135,11 @@ public class ChatServiceImpl implements ChatService {
 	}
 	
 	@Override
-	public InvitationDto getInvitationById(Map<String, Object> map) throws Exception {
-		return chatMapper.getInvitationById(map);
+	public InvitationDto getInvitationById(Map<String, Object> map) {
+		InvitationDto invitation = chatMapper.getInvitationById(map);
+		if(invitation == null) {
+			throw new RestApiException(CustomResponseCode.ROOM_INVITATION_NOT_FOUND);
+		}
+		return invitation;
 	}
 }
