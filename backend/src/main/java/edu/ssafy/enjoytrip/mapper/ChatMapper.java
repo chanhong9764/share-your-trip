@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
 import edu.ssafy.enjoytrip.dto.chat.ChattingParticipantDto;
 import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
 import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
-import edu.ssafy.enjoytrip.dto.user.UserDto;
+import edu.ssafy.enjoytrip.dto.user.User;
 
 @Mapper
 public interface ChatMapper {
@@ -23,7 +22,7 @@ public interface ChatMapper {
 	void createParticipantRoom(ChattingParticipantDto chattingParticipantDto);
 	int updateParticipantRoom(Map<String, Object> map);
 	int updateParticipantRoomById(String participantId);
-	ArrayList<UserDto> getParticipant(int roomId);
+	ArrayList<User> getParticipant(int roomId);
 	ArrayList<InvitationDto> getInvitation(String userId);
 	int deleteChattingRoomById(String participantId);
 	InvitationDto getInvitationById(Map<String, Object> map);

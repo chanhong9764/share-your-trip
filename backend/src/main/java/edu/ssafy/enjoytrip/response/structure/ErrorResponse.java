@@ -1,6 +1,7 @@
 package edu.ssafy.enjoytrip.response.structure;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.validation.FieldError;
 
@@ -18,21 +19,5 @@ public class ErrorResponse {
 	private final String message;
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private final List<ValidationError> errors;
-	
-	@Getter
-	@Builder
-	@RequiredArgsConstructor
-	public static class ValidationError {
-		private final String field;
-		private final String message;
-		
-		public static ValidationError of(final FieldError fieldError) {
-			return ValidationError.builder()
-					.field(fieldError.getField())
-					.message(fieldError.getDefaultMessage())
-					.build();
-		}
-		
-	}
+	private final Map<String, String> errors;
 }

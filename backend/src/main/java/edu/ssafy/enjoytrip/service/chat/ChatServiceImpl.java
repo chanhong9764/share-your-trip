@@ -14,7 +14,7 @@ import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
 import edu.ssafy.enjoytrip.dto.chat.ChattingParticipantDto;
 import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
 import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
-import edu.ssafy.enjoytrip.dto.user.UserDto;
+import edu.ssafy.enjoytrip.dto.user.User;
 import edu.ssafy.enjoytrip.mapper.ChatMapper;
 import edu.ssafy.enjoytrip.util.SizeConstant;
 import lombok.RequiredArgsConstructor;
@@ -32,11 +32,11 @@ public class ChatServiceImpl implements ChatService {
 		}
 		for(ChattingRoomDto chatRoom : chattingRoomList) {
 			List<String> profiles = new ArrayList<>();
-			ArrayList<UserDto> participants = chatMapper.getParticipant(chatRoom.getRoomId());
+			ArrayList<User> participants = chatMapper.getParticipant(chatRoom.getRoomId());
 			if(participants == null || participants.isEmpty()) {
 				throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_FOUND);
 			}
-			for(UserDto participant : participants) {
+			for(User participant : participants) {
 				profiles.add(participant.getProfile());
 			}
 			chatRoom.setProfiles(profiles);

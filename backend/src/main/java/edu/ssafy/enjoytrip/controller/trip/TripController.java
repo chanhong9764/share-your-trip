@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 
 @CrossOrigin("*")
 @RestController
-@Api(tags={"여행 컨트롤러 API"})
 @RequiredArgsConstructor
 @RequestMapping("/api/trips")
 public class TripController {

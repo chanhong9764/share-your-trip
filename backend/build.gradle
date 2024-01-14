@@ -24,7 +24,6 @@ dependencies {
     api libs.javax.servlet.jstl
     api libs.org.apache.tomcat.embed.tomcat.embed.jasper
     api libs.io.springfox.springfox.boot.starter
-    implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
     api libs.org.projectlombok.lombok
     api libs.org.springframework.spring.tx
     api libs.org.slf4j.slf4j.api
