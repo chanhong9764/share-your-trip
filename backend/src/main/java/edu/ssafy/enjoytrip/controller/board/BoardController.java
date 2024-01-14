@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/boards")
-@Api(tags = { "Board 컨트롤러 API" })
 public class BoardController {
 	@Value("${file.path}")
 	private String uploadPath;

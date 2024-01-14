@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/chats")
-@Api(tags = { "Chat 컨트롤러 API" })
 public class ChatController {
 	private final ChatService service;
 	

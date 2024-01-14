@@ -1,40 +1,119 @@
 package edu.ssafy.enjoytrip.dto.user;
 
-import org.apache.ibatis.type.Alias;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import edu.ssafy.enjoytrip.validation.user.UserEmail;
+import edu.ssafy.enjoytrip.validation.user.UserId;
+import edu.ssafy.enjoytrip.validation.user.UserName;
+import edu.ssafy.enjoytrip.validation.user.UserPassword;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-@Alias("user")
 public class UserDto {
-	@NotBlank(message = "아이디를 입력해주세요.")
-	@Length(min = 4, max = 10, message = "최소 4자 이상, 10자 이하를 입력해주세요.")
-	@Pattern(regexp = "^[a-z0-9]*$", message = "알파벳 소문자(a~z), 숫자(0~9)만 입력 가능합니다.")
-	private String userId;
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class AddRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+        @UserName
+        private String userName;
+        @UserEmail
+        private String email;
+        @Builder
+        public AddRequestDTO(String userId, String userPassword, String userName, String email) {
+            this.userId = userId;
+            this.userPassword = userPassword;
+            this.userName = userName;
+            this.email = email;
+        }
 
-	@NotBlank(message = "패스워드를 입력해주세요.")
-	@Length(min = 8, max = 16, message = "최소 8자 이상, 16자 이하를 입력해주세요.")
-	@Pattern(regexp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^*+=-])(?=.*[0-9]).{8,16}$", message = "비밀번호는 영문 대/소문자, 숫자, 특수문자를 사용하세요.")
-	private String userPassword;
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword)
+                    .userName(userName)
+                    .email(email).build();
+        }
+    }
 
-	@NotBlank(message = "이름을 입력해주세요.")
-	@Length(min = 2, max = 20, message = "최소 2자 이상, 20자 이하를 입력해주세요.")
-	@Pattern(regexp = "^[가-힣]*$", message = "한글만 입력해주세요.")
-	private String userName;
+    @Getter
+    @AllArgsConstructor
+    public static class ModifyProfileRequestDTO {
+        @UserId
+        private String userId;
+        @NotBlank
+        private String profile;
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .profile(profile).build();
+        }
+    }
 
-	@NotBlank(message = "이메일을 입력해주세요.")
-	@Length(min = 1, max = 64, message = "최소 1자 이상, 64자 이하를 입력해주세요.")
-	@Pattern(regexp = "^[0-9a-zA-Z]([-_\\\\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\\\\.]?[0-9a-zA-Z])*\\\\.[a-zA-Z]{2,3}+$", message = "이메일 형식이 올바르지 않습니다.")
-	private String email;
-	private String joinDate;
-	private String salt;
-	private String profile;
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class LoginRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword).build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class UserInfoResponseDTO {
+        @UserId
+        private String userId;
+        @UserName
+        private String userName;
+        @UserEmail
+        private String email;
+        @NotBlank
+        private String joinDate;
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        private String profile;
+        @Builder
+        public UserInfoResponseDTO(
+                String userId,
+                String userName,
+                String email,
+                String joinDate,
+                String profile
+        ) {
+            this.userId = userId;
+            this.userName = userName;
+            this.email = email;
+            this.joinDate = joinDate;
+            this.profile = profile;
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class ModifyRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+        @UserPassword
+        private String userConfirmPassword;
+
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword).build();
+        }
+    }
 }

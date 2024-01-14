@@ -6,7 +6,7 @@
 <mapper
         namespace="edu.ssafy.enjoytrip.mapper.UserMapper">
 
-    <resultMap type="user" id="userResultMap">
+    <resultMap type="User" id="userResultMap">
         <result column="user_id" property="userId"/>
         <result column="user_password" property="userPassword"/>
         <result column="user_name" property="userName"/>
@@ -16,12 +16,12 @@
         <result column="profile" property="profile"/>
     </resultMap>
 
-    <insert id="createUser" parameterType="user">
+    <insert id="addUser" parameterType="User">
         INSERT into users(user_id, user_password, user_name, email, join_date, salt, profile)
         VALUES (#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{salt}, #{profile})
     </insert>
 
-    <update id="modifyUser" parameterType="user">
+    <update id="modifyUser" parameterType="User">
         UPDATE users
         SET user_password = #{userPassword}
         WHERE user_id = #{userId};
@@ -67,13 +67,13 @@
         WHERE email = #{email};
     </select>
 
-    <update id="changePassword" parameterType="user">
+    <update id="changePassword" parameterType="User">
         UPDATE users
         SET user_password = #{userPassword}
         WHERE user_id = #{userId}
     </update>
 
-    <update id="changeProfile" parameterType="user">
+    <update id="modifyProfile" parameterType="User">
         UPDATE users
         SET profile = #{profile}
         WHERE user_id = #{userId}

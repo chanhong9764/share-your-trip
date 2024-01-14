@@ -1,11 +1,18 @@
 package edu.ssafy.enjoytrip.controller.user;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import edu.ssafy.enjoytrip.dto.user.UserDto;
+import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
+import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
+import edu.ssafy.enjoytrip.validation.common.Image;
+import edu.ssafy.enjoytrip.validation.user.UserEmail;
+import edu.ssafy.enjoytrip.validation.user.UserId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,9 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import edu.ssafy.enjoytrip.dto.board.BoardImagesDto;
-import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.service.user.UserService;
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 
 import javax.validation.Valid;
@@ -23,83 +28,80 @@ import javax.validation.Valid;
 @CrossOrigin("*")
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/api/users")
-@Api(tags = { "멤버 컨트롤러 API" })
 public class UserController {
 	@Value("${file.path}")
 	private String uploadPath;
 	private final UserService service;
 
 	@PostMapping
-	public ResponseEntity<Object> CreateUser(@RequestBody @Valid UserDto dto) {
-		service.createUser(dto);
+	public ResponseEntity<Object> addUser(@RequestBody @Valid UserDto.AddRequestDTO requestDTO) {
+		service.addUser(requestDTO);
 		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER_SUCCESS);
 	}
 
 	@PatchMapping
-	public ResponseEntity<Object> ModifyUser(@RequestBody @Valid UserDto dto) {
-		UserDto user = service.modifyUser(dto);
-		return SuccessResponse.createSuccess(SuccessCode.MODIFY_USER_SUCCESS, user);
+	public ResponseEntity<Object> ModifyUser(@RequestBody @Valid UserDto.ModifyRequestDTO requestDTO) {
+		UserDto.UserInfoResponseDTO responseDTO = service.modifyUser(requestDTO);
+		return SuccessResponse.createSuccess(SuccessCode.MODIFY_USER_SUCCESS, responseDTO);
 	}
 
 	@DeleteMapping("/{userid}")
-	public ResponseEntity<Object> DeleteUser(@PathVariable("userid") String userId) {
+	public ResponseEntity<Object> DeleteUser(@PathVariable("userid") @UserId final String userId) {
 		service.deleteUser(userId);
 		return SuccessResponse.createSuccess(SuccessCode.DELETE_USER_SUCCESS);
 	}
 
 	@GetMapping("/{userid}")
-	public ResponseEntity<Object> GetUser(@PathVariable("userid") String userId) {
-		UserDto user = service.findById(userId);
-		return SuccessResponse.createSuccess(SuccessCode.READ_USER_SUCCESS, user);
+	public ResponseEntity<Object> SelectUser(@PathVariable("userid") @UserId final String userId) {
+		UserDto.UserInfoResponseDTO responseDTO = service.findById(userId);
+		return SuccessResponse.createSuccess(SuccessCode.READ_USER_SUCCESS, responseDTO);
 	}
 
 	@GetMapping("/search/{userid}")
-	public ResponseEntity<Object> SearchUser(@PathVariable("userid") String userId) {
-		List<UserDto> userList = service.searchUser(userId);
-		return SuccessResponse.createSuccess(SuccessCode.SEARCH_USER_SUCCESS, userList);
+	public ResponseEntity<Object> SearchUser(@PathVariable("userid") @UserId final String userId) {
+		List<UserDto.UserInfoResponseDTO> reponseDtoList = service.searchUser(userId);
+		return SuccessResponse.createSuccess(SuccessCode.SEARCH_USER_SUCCESS, reponseDtoList);
 	}
 
 	@PostMapping("/login")
-	public ResponseEntity<Object> Login(@RequestBody UserDto dto) {
-		UserDto user = service.login(dto);
+	public ResponseEntity<Object> Login(@RequestBody @Valid UserDto.LoginRequestDTO requestDTO) {
+		UserDto.UserInfoResponseDTO responseDTO = service.login(requestDTO);
 
-		return SuccessResponse.createSuccess(SuccessCode.LOGIN_USER_SUCCESS, user);
+		return SuccessResponse.createSuccess(SuccessCode.LOGIN_USER_SUCCESS, responseDTO);
 	}
 
 	@GetMapping("/check/{userid}")
-	public ResponseEntity<Object> CheckById(@PathVariable("userid") String userId) {
+	public ResponseEntity<Object> CheckById(@PathVariable("userid") @UserId final String userId) {
 		service.checkById(userId);
 		return SuccessResponse.createSuccess(SuccessCode.VALID_USER_ID_SUCCESS);
 	}
 
 	@GetMapping("/send/{email}")
-	public ResponseEntity<Object> sendMail(@PathVariable("email") String email) {
-		int authNumber = service.SendEmail(email);
+	public ResponseEntity<Object> sendMail(@PathVariable("email") @UserEmail final String email) {
+		int authNumber = service.sendEmail(email);
 		return SuccessResponse.createSuccess(SuccessCode.SEND_USER_EMAIL_SUCCESS, authNumber);
 	}
 
 	@GetMapping("/find-id/{email}")
-	public ResponseEntity<Object> FindByEmail(@PathVariable("email") String email) {
-		String userId = service.FindByEmail(email);
+	public ResponseEntity<Object> findByEmail(@PathVariable("email") @UserEmail final String email) {
+		String userId = service.findByEmail(email);
 		return SuccessResponse.createSuccess(SuccessCode.FIND_USER_ID_SUCCESS, userId);
 	}
 
 	@PatchMapping("/password")
-	public ResponseEntity<Object> ChangePassword(@RequestBody UserDto dto) {
-		service.ChangePassword(dto);
+	public ResponseEntity<Object> modifyPassword(@RequestBody @Valid UserDto.ModifyRequestDTO requestDTO) {
+		service.modifyPassword(requestDTO);
 		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PASSWORD_USER_SUCCESS);
 	}
 
-	@PostMapping("/changeProfile")
-	public ResponseEntity<Object> changeProfile(@RequestParam("userId") String userId,
-			@RequestParam(value = "images") MultipartFile images) throws Exception {
-		UserDto userDto = new UserDto();
-		userDto.setUserId(userId);
-
+	@PostMapping("/modify-profile")
+	public ResponseEntity<Object> modifyProfile(@RequestParam("userId") @UserId final String userId,
+			@RequestParam(value = "profile") @Image MultipartFile profile) {
 		BoardImagesDto imageInfo = new BoardImagesDto();
 		String today = new SimpleDateFormat("yyMMdd").format(new Date());
-		if (!images.isEmpty()) {
+		if (!profile.isEmpty()) {
 			String saveFolder = uploadPath + today;
 			File folder = new File(saveFolder);
 
@@ -107,20 +109,23 @@ public class UserController {
 				folder.mkdirs();
 			}
 
-			String originalFileName = images.getOriginalFilename();
+			String originalFileName = profile.getOriginalFilename();
 			if (originalFileName != null && !originalFileName.isEmpty()) {
 				String saveFileName = UUID.randomUUID().toString()
 						+ originalFileName.substring(originalFileName.lastIndexOf('.'));
 				imageInfo.setSaveFolder(saveFolder);
 				imageInfo.setOriginalName(originalFileName);
 				imageInfo.setSaveFile(saveFileName);
-				images.transferTo(new File(folder, saveFileName));
+				try {
+					profile.transferTo(new File(folder, saveFileName));
+				} catch (IOException e) {
+					throw new RestApiException(CustomResponseCode.IMAGE_NOT_CREATED);
+				}
 			}
 		}
-		userDto.setProfile("/"+today+"/" + imageInfo.getSaveFile());
+		UserDto.ModifyProfileRequestDTO requestDTO = new UserDto.ModifyProfileRequestDTO(userId, "/"+today+"/" + imageInfo.getSaveFile());
+		service.modifyProfile(requestDTO);
 
-		service.changeProfile(userDto);
-
-		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PROFILE_USER_SUCCESS, userDto.getProfile());
+		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PROFILE_USER_SUCCESS, requestDTO.getProfile());
 	}
 }
