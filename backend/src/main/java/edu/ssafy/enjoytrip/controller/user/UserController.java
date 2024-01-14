@@ -8,6 +8,7 @@ import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +17,8 @@ import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.service.user.UserService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+
+import javax.validation.Valid;
 
 @CrossOrigin("*")
 @RestController
@@ -28,13 +31,13 @@ public class UserController {
 	private final UserService service;
 
 	@PostMapping
-	public ResponseEntity<Object> CreateUser(@RequestBody UserDto dto) {
+	public ResponseEntity<Object> CreateUser(@RequestBody @Valid UserDto dto) {
 		service.createUser(dto);
 		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER_SUCCESS);
 	}
 
 	@PatchMapping
-	public ResponseEntity<Object> ModifyUser(@RequestBody UserDto dto) {
+	public ResponseEntity<Object> ModifyUser(@RequestBody @Valid UserDto dto) {
 		UserDto user = service.modifyUser(dto);
 		return SuccessResponse.createSuccess(SuccessCode.MODIFY_USER_SUCCESS, user);
 	}
