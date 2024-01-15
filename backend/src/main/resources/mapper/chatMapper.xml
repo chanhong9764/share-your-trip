@@ -4,7 +4,7 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	<mapper namespace="edu.ssafy.enjoytrip.mapper.ChatMapper">
 	
-	<resultMap type="chattingRoomDto" id="chatResultMap">
+	<resultMap type="chattingRoom" id="chatResultMap">
 		<result column="room_id" property="roomId"/>
 		<result column="identifier" property="identifier"/>
 		<result column="content" property="content"/>
@@ -12,7 +12,7 @@
 		<result column="createdAt" property="createdAt"/>
 	</resultMap>
 	
-	<resultMap type="chattingDto" id="chattingResultMap">
+	<resultMap type="chatting" id="chattingResultMap">
 		<result column="chatting_id" property="chattingId"/>
 		<result column="message" property="message"/>
 		<result column="user_id" property="userId"/>
@@ -28,7 +28,7 @@
 		<result column="profile" property="profile"/>
 	</resultMap>
 	
-	<resultMap type="invitationDto" id="invitationResultMap">
+	<resultMap type="invitation" id="invitationResultMap">
 		<result column="identifier" property="identifier"/>
 		<result column="participant_id" property="participantId"/>
 	</resultMap>
@@ -42,7 +42,7 @@
 		and p.isAccepted = 1;
 	</select>
 	
-	<insert id="createChattingRoom" parameterType="ChattingRoomDto" >
+	<insert id="createChattingRoom" parameterType="chattingRoom" >
 		insert into chatting_room (identifier, content, room_name)
 		values (#{identifier}, #{content}, #{roomName})
 		<selectKey resultType="int" keyProperty="roomId" order="AFTER">
@@ -55,12 +55,12 @@
 		where room_id = #{roomId} and user_id = #{userId}
 	</delete>
 	
-	<insert id="createParticipantRoom" parameterType="chattingParticipantDto">
+	<insert id="createParticipantRoom" parameterType="chattingParticipant">
 		insert into chatting_participant (room_id, user_id)
 		values (#{roomId}, #{userId})
 	</insert>
 	
-	<update id="updateParticipantRoom" parameterType="map">
+	<update id="updateParticipantRoom" parameterType="ChattingParticipant">
 		update chatting_participant
 		set isAccepted = 1
 		where room_id = #{roomId} and user_id = #{userId}
@@ -86,7 +86,7 @@
 		and isAccepted = 0
 	</select>
 	
-	<select id="getInvitationById" parameterType="map" resultMap="invitationResultMap">
+	<select id="getInvitationById" parameterType="ChattingParticipant" resultMap="invitationResultMap">
 		select c.identifier, p.participant_id
 		from chatting_participant p 
 		join chatting_room c
@@ -96,7 +96,7 @@
 		and isAccepted = 0
 	</select>
 	
-	<insert id="createChatting" parameterType="chattingDto">
+	<insert id="createChatting" parameterType="chatting">
 		insert into chatting (room_id, user_id, message)
 		values (#{roomId}, #{userId}, #{message})
 		<selectKey resultType="int" keyProperty="chattingId" order="AFTER">

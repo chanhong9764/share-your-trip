@@ -1,7 +1,10 @@
 package edu.ssafy.enjoytrip.service.comment;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import edu.ssafy.enjoytrip.dto.comment.Comment;
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import lombok.RequiredArgsConstructor;
@@ -16,17 +19,19 @@ public class CommentServiceImpl implements CommentService {
 	private final CommentMapper commentMapper;
 
 	@Override
-	public ArrayList<CommentDto> getComments(int articleNo){
-		ArrayList<CommentDto> comments = commentMapper.getComments(articleNo);
-		if(comments == null || comments.isEmpty()) {
+	public List<CommentDto.CommentResponseDto> getComments(int articleNo){
+		List<CommentDto.CommentResponseDto> comments = commentMapper.getComments(articleNo).stream()
+				.map(Comment::toCommentResponseDto)
+				.collect(Collectors.toList());
+		if(comments.isEmpty()) {
 			throw new RestApiException(CustomResponseCode.COMMENT_NOT_FOUND);
 		}
 		return comments;
 	}
 	@Override
-	public void createComment(CommentDto commentDto){
+	public void createComment(CommentDto.CommentRequestDto requestDto){
 		try {
-			commentMapper.createComment(commentDto);
+			commentMapper.createComment(requestDto.toEntity());
 		} catch (DataIntegrityViolationException e) {
 			throw new RestApiException(CustomResponseCode.INVALID_COMMENT_CONTENT);
 		}

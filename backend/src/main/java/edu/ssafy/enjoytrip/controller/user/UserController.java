@@ -36,7 +36,7 @@ public class UserController {
 	private final UserService service;
 
 	@PostMapping
-	public ResponseEntity<Object> addUser(@RequestBody @Valid UserDto.AddRequestDTO requestDTO) {
+	public ResponseEntity<Object> AddUser(@RequestBody @Valid UserDto.AddRequestDTO requestDTO) {
 		service.addUser(requestDTO);
 		return SuccessResponse.createSuccess(SuccessCode.CREATED_USER_SUCCESS);
 	}
@@ -79,25 +79,25 @@ public class UserController {
 	}
 
 	@GetMapping("/send/{email}")
-	public ResponseEntity<Object> sendMail(@PathVariable("email") @UserEmail final String email) {
+	public ResponseEntity<Object> SendMail(@PathVariable("email") @UserEmail final String email) {
 		int authNumber = service.sendEmail(email);
 		return SuccessResponse.createSuccess(SuccessCode.SEND_USER_EMAIL_SUCCESS, authNumber);
 	}
 
 	@GetMapping("/find-id/{email}")
-	public ResponseEntity<Object> findByEmail(@PathVariable("email") @UserEmail final String email) {
+	public ResponseEntity<Object> FindByEmail(@PathVariable("email") @UserEmail final String email) {
 		String userId = service.findByEmail(email);
 		return SuccessResponse.createSuccess(SuccessCode.FIND_USER_ID_SUCCESS, userId);
 	}
 
 	@PatchMapping("/password")
-	public ResponseEntity<Object> modifyPassword(@RequestBody @Valid UserDto.ModifyRequestDTO requestDTO) {
+	public ResponseEntity<Object> ModifyPassword(@RequestBody @Valid UserDto.ModifyRequestDTO requestDTO) {
 		service.modifyPassword(requestDTO);
 		return SuccessResponse.createSuccess(SuccessCode.CHANGE_PASSWORD_USER_SUCCESS);
 	}
 
 	@PostMapping("/modify-profile")
-	public ResponseEntity<Object> modifyProfile(@RequestParam("userId") @UserId final String userId,
+	public ResponseEntity<Object> ModifyProfile(@RequestParam("userId") @UserId final String userId,
 			@RequestParam(value = "profile") @Image MultipartFile profile) {
 		BoardImagesDto imageInfo = new BoardImagesDto();
 		String today = new SimpleDateFormat("yyMMdd").format(new Date());

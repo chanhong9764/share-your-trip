@@ -1,8 +1,10 @@
 package edu.ssafy.enjoytrip.controller.trip;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
+import edu.ssafy.enjoytrip.dto.trip.TripDto;
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
-import edu.ssafy.enjoytrip.dto.trip.TripDto;
 import edu.ssafy.enjoytrip.service.trip.TripService;
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 
 @CrossOrigin("*")
@@ -27,9 +27,9 @@ public class TripController {
 	
 	@GetMapping("/{roomId}")
 	private ResponseEntity<Object> GetTrip(@PathVariable("roomId") String roomId) {
-		ArrayList<TripDto> list = service.getTrip(roomId);
+		List<TripDto.TripInfoDTO> responseDto = service.getTrip(roomId);
 
-		return SuccessResponse.createSuccess(SuccessCode.LOAD_LIST_TRIP_SUCCESS, list);
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_LIST_TRIP_SUCCESS, responseDto);
 	}
 
 }

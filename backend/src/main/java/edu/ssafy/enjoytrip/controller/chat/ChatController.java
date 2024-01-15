@@ -1,6 +1,7 @@
 package edu.ssafy.enjoytrip.controller.chat;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
@@ -17,9 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
 import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
-import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
+import edu.ssafy.enjoytrip.dto.chat.Invitation;
 import edu.ssafy.enjoytrip.service.chat.ChatService;
-import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 
 @CrossOrigin("*")
@@ -31,14 +31,14 @@ public class ChatController {
 	
 	@GetMapping("/{userId}")
 	public ResponseEntity<Object> GetChattingRoomList(@PathVariable("userId") String userId) {
-		ArrayList<ChattingRoomDto> chattingRoomList = service.getChattingRoomList(userId);
+		List<ChattingRoomDto.ChattingRoomResponseDto> responseDtoList = service.getChattingRoomList(userId);
 
-		return SuccessResponse.createSuccess(SuccessCode.LOAD_ROOM_LIST_SUCCESS, chattingRoomList);
+		return SuccessResponse.createSuccess(SuccessCode.LOAD_ROOM_LIST_SUCCESS, responseDtoList);
 	}
 	
 	@GetMapping
 	public ResponseEntity<Object> GetChattingList(@RequestParam Map<String, String> map) {
-		ArrayList<ChattingDto> chattingList = service.getChattingList(map);
+		List<ChattingDto> chattingList = service.getChattingList(map);
 
 		return SuccessResponse.createSuccess(SuccessCode.LOAD_CHATTING_LIST_SUCCESS, chattingList);
 	}
@@ -66,7 +66,7 @@ public class ChatController {
 	
 	@GetMapping("/invitations")
 	public ResponseEntity<Object> getInvitationsRoom(@RequestParam("userId") String userId) {
-		ArrayList<InvitationDto> invitation = service.getInvitation(userId);
+		List<Invitation> invitation = service.getInvitation(userId);
 
 		return SuccessResponse.createSuccess(SuccessCode.LOAD_ROOM_INVITATION_SUCCESS, invitation);
 	}

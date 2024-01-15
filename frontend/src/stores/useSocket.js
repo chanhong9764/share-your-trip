@@ -153,7 +153,7 @@ export const useSocketStore = defineStore('socket', () => {
                 phone: data.phone,
             };
 
-            stompClient.value.send('/pub/selectTrip', JSON.stringify(requestData), {});
+            stompClient.value.send('/pub/insertTrip', JSON.stringify(requestData), {});
         }
     };
 

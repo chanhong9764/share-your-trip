@@ -1,17 +1,20 @@
 package edu.ssafy.enjoytrip.dto.chat;
 
-import org.apache.ibatis.type.Alias;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-@Alias("invitationDto")
 public class InvitationDto {
-	private String identifier;
-	private int participantId;
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    @Getter
+    public static class InvitationResponseDto {
+        private String identifier;
+        private int participantId;
+        @Builder
+        public InvitationResponseDto(String identifier, int participantId) {
+            this.identifier = identifier;
+            this.participantId = participantId;
+        }
+    }
 }

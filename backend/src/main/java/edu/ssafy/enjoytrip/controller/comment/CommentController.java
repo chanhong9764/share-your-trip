@@ -1,6 +1,7 @@
 package edu.ssafy.enjoytrip.controller.comment;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
@@ -29,24 +30,24 @@ public class CommentController {
 	
 	@GetMapping("/{articleNo}")
 	public ResponseEntity<Object> getComments(@PathVariable("articleNo") int articleNo ) {
-		ArrayList<CommentDto> comments = service.getComments(articleNo);
+		List<CommentDto.CommentResponseDto> comments = service.getComments(articleNo);
 
 		return SuccessResponse.createSuccess(SuccessCode.LOAD_COMMENT_SUCCESS, comments);
 	}
 	
 	@PostMapping
-	public ResponseEntity<Object> setComment(@RequestBody CommentDto commentDto) {
-		service.createComment(commentDto);
-		ArrayList<CommentDto> comments = service.getComments(commentDto.getArticleNo());
+	public ResponseEntity<Object> setComment(@RequestBody CommentDto.CommentRequestDto requestDto) {
+		service.createComment(requestDto);
+		List<CommentDto.CommentResponseDto> responseDtoList = service.getComments(requestDto.getArticleNo());
 
-		return SuccessResponse.createSuccess(SuccessCode.CREATED_COMMENT_SUCCESS, comments);
+		return SuccessResponse.createSuccess(SuccessCode.CREATED_COMMENT_SUCCESS, responseDtoList);
 	}
 
 	@DeleteMapping
 	public ResponseEntity<Object> delComment(@RequestParam("articleNo") int articleNo, @RequestParam("commentId") int commentId) {
 		service.deleteComment(commentId);
-		ArrayList<CommentDto> comments = service.getComments(articleNo);
+		List<CommentDto.CommentResponseDto> responseDtoList = service.getComments(articleNo);
 
-		return SuccessResponse.createSuccess(SuccessCode.DELETE_COMMENT_SUCCESS, comments);
+		return SuccessResponse.createSuccess(SuccessCode.DELETE_COMMENT_SUCCESS, responseDtoList);
 	}
 }
