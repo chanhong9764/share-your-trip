@@ -4,17 +4,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import edu.ssafy.enjoytrip.dto.chat.*;
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
-import edu.ssafy.enjoytrip.dto.chat.ChattingParticipantDto;
-import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
-import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
-import edu.ssafy.enjoytrip.dto.user.UserDto;
+import edu.ssafy.enjoytrip.dto.user.User;
 import edu.ssafy.enjoytrip.mapper.ChatMapper;
 import edu.ssafy.enjoytrip.util.SizeConstant;
 import lombok.RequiredArgsConstructor;
@@ -25,82 +23,76 @@ public class ChatServiceImpl implements ChatService {
 	private final ChatMapper chatMapper;
 
 	@Override
-	public ArrayList<ChattingRoomDto> getChattingRoomList(String userId) {
-		ArrayList<ChattingRoomDto> chattingRoomList = chatMapper.getChattingRoomList(userId);
+	public List<ChattingRoomDto.ChattingRoomResponseDto> getChattingRoomList(String userId) {
+		List<ChattingRoom> chattingRoomList = chatMapper.getChattingRoomList(userId);
 		if(chattingRoomList == null || chattingRoomList.isEmpty()) {
 			throw new RestApiException(CustomResponseCode.CHATTING_ROOM_NOT_FOUND);
 		}
-		for(ChattingRoomDto chatRoom : chattingRoomList) {
+		List<ChattingRoomDto.ChattingRoomResponseDto> chattingRoomDtoList = chattingRoomList.stream()
+				.map(ChattingRoom::tochattingRoomResponseDto)
+				.collect(Collectors.toList());
+		for(ChattingRoomDto.ChattingRoomResponseDto chatRoom : chattingRoomDtoList) {
 			List<String> profiles = new ArrayList<>();
-			ArrayList<UserDto> participants = chatMapper.getParticipant(chatRoom.getRoomId());
+			List<User> participants = chatMapper.getParticipant(chatRoom.getRoomId());
+
 			if(participants == null || participants.isEmpty()) {
 				throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_FOUND);
 			}
-			for(UserDto participant : participants) {
+			for(User participant : participants) {
 				profiles.add(participant.getProfile());
 			}
-			chatRoom.setProfiles(profiles);
+			chatRoom.updateProfiles(profiles);
 		}
-		return chattingRoomList;
+		return chattingRoomDtoList;
 	}
 	
 	@Override
-	public void createChattingRoom(ChattingRoomDto chattingRoomDto) {
+	public void createChattingRoom(ChattingRoomDto.ChattingRoomCreateRequestDto requestDto) {
 		try {
-			chatMapper.createChattingRoom(chattingRoomDto);
+			chatMapper.createChattingRoom(requestDto);
 		} catch (DataIntegrityViolationException e) {
 			throw new RestApiException(CustomResponseCode.CHATTING_ROOM_NOT_CREATED);
 		}
-		String[] participants = chattingRoomDto.getIdentifier().split(",");
-		ChattingParticipantDto participantDto = new ChattingParticipantDto();
-
-		participantDto.setIsAccepted(0);
-		participantDto.setRoomId(chattingRoomDto.getRoomId());
+		String[] participants = requestDto.getIdentifier().split(",");
+		ChattingParticipantDto.ChattingParticipantCreateDto participantDto = ChattingParticipantDto.ChattingParticipantCreateDto.builder()
+				.roomId(requestDto.getRoomId())
+				.build();
 
 		for(String participant : participants) {
-			participantDto.setUserId(participant);
+			participantDto.updateUserId(participant);
 			try {
-				chatMapper.createParticipantRoom(participantDto);
+				chatMapper.createParticipantRoom(participantDto.toEntity());
 			} catch (DataIntegrityViolationException e) {
 				throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_ENTERED);
 			}
 		}
-		Map<String, Object> map = new HashMap<>();
-		map.put("roomId", chattingRoomDto.getRoomId());
-		map.put("userId", participants[0]);
 
-		int cnt = chatMapper.updateParticipantRoom(map);
+		participantDto.updateUserId(participants[0]);
+		int cnt = chatMapper.updateParticipantRoom(participantDto.toEntity());
 		if(cnt == 0) {
 			throw new RestApiException(CustomResponseCode.PARTICIPANT_NOT_ENTERED);
 		}
 	}
 	@Override
-	public void deleteChattingRoom(Map<String, Object> map) {
-		int cnt = chatMapper.deleteChattingRoom(map);
+	public void deleteChattingRoom(ChattingDto.DeleteChattingRequest requestDto) {
+		int cnt = chatMapper.deleteChattingRoom(requestDto);
 		if(cnt == 0) {
 			throw new RestApiException(CustomResponseCode.CHATTING_ROOM_NOT_FOUND);
 		}
 	}
 	
 	@Override
-	public void createChatting(ChattingDto chattingDto){
+	public void createChatting(ChattingDto.CreateRequest requestDto){
 		try {
-			chatMapper.createChatting(chattingDto);
+			chatMapper.createChatting(requestDto.toEntity());
 		} catch (DataIntegrityViolationException e) {
 			throw new RestApiException(CustomResponseCode.CHATTING_NOT_CREATED);
 		}
 	}
 
 	@Override
-	public ArrayList<ChattingDto> getChattingList(Map<String, String> map) {
-		Map<String, Object> param = new HashMap<>();
-		int pgno = Integer.parseInt(map.get("pgno") == null ? "1" : map.get("pgno"));
-		int start = pgno * SizeConstant.LIST_SIZE - SizeConstant.LIST_SIZE;
-		
-		param.put("start", start);
-		param.put("listsize", SizeConstant.LIST_SIZE);
-		param.put("roomId", map.get("roomId"));
-		ArrayList<ChattingDto> chattingList = chatMapper.getChattingList(param);
+	public ArrayList<ChattingDto> getChattingList(ChattingDto.ChattingListRequest requestDto) {
+		ArrayList<ChattingDto> chattingList = chatMapper.getChattingList(requestDto);
 
 		if(chattingList == null || chattingList.isEmpty()) {
 			throw new RestApiException(CustomResponseCode.CHATTING_LIST_NOT_FOUND);
@@ -110,8 +102,8 @@ public class ChatServiceImpl implements ChatService {
 	}
 	
 	@Override
-	public ArrayList<InvitationDto> getInvitation(String userId){
-		ArrayList<InvitationDto> invitation = chatMapper.getInvitation(userId);
+	public List<Invitation> getInvitation(String userId){
+		List<Invitation> invitation = chatMapper.getInvitation(userId);
 		if(invitation == null || invitation.isEmpty()) {
 			throw new RestApiException(CustomResponseCode.ROOM_INVITATION_NOT_FOUND);
 		}
@@ -135,11 +127,11 @@ public class ChatServiceImpl implements ChatService {
 	}
 	
 	@Override
-	public InvitationDto getInvitationById(Map<String, Object> map) {
-		InvitationDto invitation = chatMapper.getInvitationById(map);
-		if(invitation == null) {
+	public InvitationDto.InvitationResponseDto getInvitationById(ChattingParticipantDto.ChattingParticipantCreateDto participantCreateDto) {
+		InvitationDto.InvitationResponseDto invitationResponseDto = chatMapper.getInvitationById(participantCreateDto.toEntity()).toInvitationResponse();
+		if(invitationResponseDto == null) {
 			throw new RestApiException(CustomResponseCode.ROOM_INVITATION_NOT_FOUND);
 		}
-		return invitation;
+		return invitationResponseDto;
 	}
 }

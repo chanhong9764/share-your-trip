@@ -34,7 +34,7 @@
 		<result column="name" property="name"/>
 	</resultMap>
 	
-	<select id="listArticle" parameterType="map" resultMap="boardListResultMap">
+	<select id="listArticle" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$ListRequest" resultMap="boardListResultMap">
 		select t.article_no, t.user_id, t.profile, t.content, count(recommend_id) as recommend_cnt, t.createdAt
 		from (
 			select b.article_no, b.user_id, u.profile, b.content, b.createdAt
@@ -50,10 +50,10 @@
 			recommend_cnt desc,
 		</if> 
 		t.article_no desc
-		limit #{start}, #{listsize}
+		limit #{start}, #{listSize}
 	</select>
 	
-	<select id="listArticleByHashtag" parameterType="map" resultMap="boardListResultMap" >
+	<select id="listArticleByHashtag" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$ListRequest" resultMap="boardListResultMap" >
 		select d.article_no, d.user_id, d.profile, d.content, count(recommend_id) as recommend_cnt, d.createdAt
 		from (
 			select c.article_no, c.user_id, c.content, c.createdAt, u.profile  from 
@@ -80,7 +80,7 @@
 			recommend_cnt desc,
 		</if>  
 		d.article_no desc
-		limit #{start}, #{listsize}
+		limit #{start}, #{listSize}
 	</select>
 	
 	
@@ -92,7 +92,7 @@
 		where article_no = #{articleNo};
 	</select>
 	
-	<insert id="writeArticle" parameterType="boardDto">
+	<insert id="writeArticle" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$WriteRequest">
 		insert into board (user_id, content)
 		values (#{userId}, #{content})
 		<selectKey resultType="int" keyProperty="articleNo" order="AFTER">
@@ -100,7 +100,7 @@
 		</selectKey>
 	</insert>
 	
-	<insert id="registerFile" parameterType="boardDto">
+	<insert id="registerFile" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$WriteRequest">
 		insert into board_images (article_no, save_folder, original_name, save_file)
 		values
 		<foreach collection="images" item="image" separator=" , ">
@@ -128,7 +128,7 @@
 		where t.article_no = #{articleNo}
 	</select>
 	
-	<update id="modifyArticle" parameterType="boardDto">
+	<update id="modifyArticle" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$ModifyRequest">
 		update board
 		set content = #{content}
 		where article_no = #{articleNo}
@@ -153,12 +153,19 @@
 		delete from recommend
 		where article_no = #{articleNo} and user_id = #{userId}
 	</delete>
+
+	<select id="getRecommendUser" parameterType="edu.ssafy.enjoytrip.dto.board.BoardDto$PostRequest" resultType="int">
+		select count(*)
+		from recommend
+		where user_id = #{userId} and article_no = #{articleNo}
+	</select>
 	
 	<select id="isExistHashTag" parameterType="String" resultType="Integer">
 		select hashtag_id
 		from hashtag
 		where name = #{tag}
 	</select>
+
 	
 	<insert id="createHashTag" parameterType="hashTagDto">
 		insert into hashtag (name)

@@ -19,11 +19,11 @@ dependencies {
     api libs.org.springframework.boot.spring.boot.starter.websocket
     // https://mvnrepository.com/artifact/org.mybatis.spring.boot/mybatis-spring-boot-starter
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.17'
     api libs.com.mysql.mysql.connector.j
     api libs.javax.servlet.jstl
     api libs.org.apache.tomcat.embed.tomcat.embed.jasper
     api libs.io.springfox.springfox.boot.starter
-    api libs.io.springfox.springfox.swagger.ui
     api libs.org.projectlombok.lombok
     api libs.org.springframework.spring.tx
     api libs.org.slf4j.slf4j.api

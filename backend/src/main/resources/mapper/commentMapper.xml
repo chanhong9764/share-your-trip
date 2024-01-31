@@ -6,12 +6,13 @@
 
 <mapper namespace="edu.ssafy.enjoytrip.mapper.CommentMapper">
 
-	<resultMap type="commentDto" id="commentResultMap">
+	<resultMap type="comment" id="commentResultMap">
 		<result column="comment_id" property="commentId"/>
 		<result column="user_id" property="userId"/>
 		<result column="article_no" property="articleNo"/>
 		<result column="content" property="content"/>
 		<result column="createdAt" property="createdAt"/>
+		<result column="profile" property="profile"/>
 	</resultMap>
 
 	<select id="getComments" parameterType="int" resultMap="commentResultMap">
@@ -23,7 +24,7 @@
 		order by c.createdAt asc
 	</select>
 	
-	<insert id="createComment" parameterType="commentDto">
+	<insert id="createComment" parameterType="comment">
 		insert into comments (user_id, article_no, content)
 		values (#{userId}, #{articleNo}, #{content})
 	</insert>

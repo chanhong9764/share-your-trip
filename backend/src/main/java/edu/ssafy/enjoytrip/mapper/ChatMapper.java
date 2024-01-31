@@ -1,34 +1,31 @@
 package edu.ssafy.enjoytrip.mapper;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import edu.ssafy.enjoytrip.dto.chat.*;
 import org.apache.ibatis.annotations.Mapper;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import edu.ssafy.enjoytrip.dto.chat.ChattingDto;
-import edu.ssafy.enjoytrip.dto.chat.ChattingParticipantDto;
-import edu.ssafy.enjoytrip.dto.chat.ChattingRoomDto;
-import edu.ssafy.enjoytrip.dto.chat.InvitationDto;
-import edu.ssafy.enjoytrip.dto.user.UserDto;
+import edu.ssafy.enjoytrip.dto.user.User;
 
 @Mapper
 public interface ChatMapper {
 	// 채팅방 관련 기능들
-	ArrayList<ChattingRoomDto> getChattingRoomList(String userId);
-	void createChattingRoom(ChattingRoomDto chattingRoomDto);
-	int deleteChattingRoom(Map<String, Object> map);
+	List<ChattingRoom> getChattingRoomList(String userId);
+	void createChattingRoom(ChattingRoomDto.ChattingRoomCreateRequestDto chattingRoomDto);
+	int deleteChattingRoom(ChattingDto.DeleteChattingRequest requestDto);
 	
 	// 채팅방 참여 기능
-	void createParticipantRoom(ChattingParticipantDto chattingParticipantDto);
-	int updateParticipantRoom(Map<String, Object> map);
+	void createParticipantRoom(ChattingParticipant chattingParticipant);
+	int updateParticipantRoom(ChattingParticipant chattingParticipant);
 	int updateParticipantRoomById(String participantId);
-	ArrayList<UserDto> getParticipant(int roomId);
-	ArrayList<InvitationDto> getInvitation(String userId);
+	List<User> getParticipant(int roomId);
+	List<Invitation> getInvitation(String userId);
 	int deleteChattingRoomById(String participantId);
-	InvitationDto getInvitationById(Map<String, Object> map);
+	Invitation getInvitationById(ChattingParticipant chattingParticipant);
 	
 	// 채팅 관련 기능
-	void createChatting(ChattingDto chattingDto);
-	ArrayList<ChattingDto> getChattingList(Map<String, Object> map);
+	void createChatting(Chatting chatting);
+	ArrayList<ChattingDto> getChattingList(ChattingDto.ChattingListRequest requestDto);
 }

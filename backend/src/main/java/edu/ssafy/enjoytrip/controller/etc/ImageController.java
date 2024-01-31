@@ -23,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/images")
-@Api(tags = { "이미지 컨트롤러 API" })
 public class ImageController {
 	@Value("${file.path}")
 	private String uploadPath;

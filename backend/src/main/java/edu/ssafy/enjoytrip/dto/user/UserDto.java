@@ -1,21 +1,119 @@
 package edu.ssafy.enjoytrip.dto.user;
 
-import org.apache.ibatis.type.Alias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import edu.ssafy.enjoytrip.validation.user.UserEmail;
+import edu.ssafy.enjoytrip.validation.user.UserId;
+import edu.ssafy.enjoytrip.validation.user.UserName;
+import edu.ssafy.enjoytrip.validation.user.UserPassword;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.*;
+import org.hibernate.validator.constraints.Length;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Data
-@Alias("user")
 public class UserDto {
-	private String userId;
-	private String userPassword;
-	private String userName;
-	private String email;
-	private String joinDate;
-	private String salt;
-	private String profile;
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class AddRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+        @UserName
+        private String userName;
+        @UserEmail
+        private String email;
+        @Builder
+        public AddRequestDTO(String userId, String userPassword, String userName, String email) {
+            this.userId = userId;
+            this.userPassword = userPassword;
+            this.userName = userName;
+            this.email = email;
+        }
+
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword)
+                    .userName(userName)
+                    .email(email).build();
+        }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public static class ModifyProfileRequestDTO {
+        @UserId
+        private String userId;
+        @NotBlank
+        private String profile;
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .profile(profile).build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class LoginRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword).build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class UserInfoResponseDTO {
+        @UserId
+        private String userId;
+        @UserName
+        private String userName;
+        @UserEmail
+        private String email;
+        @NotBlank
+        private String joinDate;
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        private String profile;
+        @Builder
+        public UserInfoResponseDTO(
+                String userId,
+                String userName,
+                String email,
+                String joinDate,
+                String profile
+        ) {
+            this.userId = userId;
+            this.userName = userName;
+            this.email = email;
+            this.joinDate = joinDate;
+            this.profile = profile;
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class ModifyRequestDTO {
+        @UserId
+        private String userId;
+        @UserPassword
+        private String userPassword;
+        @UserPassword
+        private String userConfirmPassword;
+
+        public User toEntity() {
+            return User.builder()
+                    .userId(userId)
+                    .userPassword(userPassword).build();
+        }
+    }
 }
