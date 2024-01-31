@@ -10,15 +10,15 @@ import edu.ssafy.enjoytrip.dto.board.HashTagDto;
 
 public interface BoardService {
 
-	void writeArticle(BoardDto boardDto, String[] hashtag);
-	List<BoardResponseDto> listArticle(Map<String, String> map);
-	BoardResponseDto getArticle(BoardDto dto);
+	void writeArticle(BoardDto.WriteRequest requestDto);
+	List<BoardResponseDto> listArticle(BoardDto.ListRequest requestDto);
+	BoardResponseDto getArticle(BoardDto.PostRequest requestDto);
 
-	void modifyArticle(BoardDto boardDto, String[] addHashtag, String[] removeHashtag, String[] removeImages);
+	void modifyArticle(BoardDto.ModifyRequest requestDto);
 	void deleteArticle(int articleNo) ;
 	
-	void setRecommend(BoardDto boardDto);
-	void delRecommend(BoardDto boardDto);
+	void setRecommend(BoardDto.RecommendRequest requestDto);
+	void delRecommend(BoardDto.RecommendRequest requestDto);
 
 	List<HashTagDto> getHotHashTag();
 }

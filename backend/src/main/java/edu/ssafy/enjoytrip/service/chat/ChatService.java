@@ -9,7 +9,7 @@ import edu.ssafy.enjoytrip.dto.chat.*;
 public interface ChatService {
 	List<ChattingRoomDto.ChattingRoomResponseDto> getChattingRoomList(String userId);
 	void createChattingRoom(ChattingRoomDto.ChattingRoomCreateRequestDto requestDto);
-	void deleteChattingRoom(Map<String, Object> map);
+	void deleteChattingRoom(ChattingDto.DeleteChattingRequest requestDto);
 	// 채팅방 참여 기능
 	void updateParticipantRoomById(String participantId);
 	List<Invitation> getInvitation(String userId);
@@ -17,6 +17,6 @@ public interface ChatService {
 	InvitationDto.InvitationResponseDto getInvitationById(ChattingParticipantDto.ChattingParticipantCreateDto participantCreateDto);
 	
 	// 채팅 관련 기능
-	void createChatting(ChattingDto.ChattingRequestDto requestDto);
-	List<ChattingDto> getChattingList(Map<String, String> map);
+	void createChatting(ChattingDto.CreateRequest requestDto);
+	List<ChattingDto> getChattingList(ChattingDto.ChattingListRequest requestDto);
 }

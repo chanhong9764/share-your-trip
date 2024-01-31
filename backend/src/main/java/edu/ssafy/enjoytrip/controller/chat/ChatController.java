@@ -6,6 +6,7 @@ import java.util.Map;
 
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
 import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
+import edu.ssafy.enjoytrip.util.SizeConstant;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,15 +38,17 @@ public class ChatController {
 	}
 	
 	@GetMapping
-	public ResponseEntity<Object> GetChattingList(@RequestParam Map<String, String> map) {
-		List<ChattingDto> chattingList = service.getChattingList(map);
+	public ResponseEntity<Object> GetChattingList(@RequestParam("roomId") int roomId, @RequestParam(value = "pgno", required = false, defaultValue = "1") int pgno) {
+		List<ChattingDto> chattingList = service.getChattingList(
+				new ChattingDto.ChattingListRequest(pgno * SizeConstant.LIST_SIZE - SizeConstant.LIST_SIZE, SizeConstant.LIST_SIZE, roomId)
+		);
 
 		return SuccessResponse.createSuccess(SuccessCode.LOAD_CHATTING_LIST_SUCCESS, chattingList);
 	}
 	
 	@DeleteMapping
-	public ResponseEntity<Object> deleteChattingRoom(@RequestParam Map<String, Object> map) {
-		service.deleteChattingRoom(map);
+	public ResponseEntity<Object> deleteChattingRoom(ChattingDto.DeleteChattingRequest requestDto) {
+		service.deleteChattingRoom(requestDto);
 
 		return SuccessResponse.createSuccess(SuccessCode.DELETE_CHATTING_ROOM_SUCCESS);
 	}

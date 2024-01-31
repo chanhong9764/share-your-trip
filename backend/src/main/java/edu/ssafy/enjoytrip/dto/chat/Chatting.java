@@ -8,7 +8,6 @@ import org.apache.ibatis.type.Alias;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Alias("chatting")
 public class Chatting {
     private int chattingId;
     private String message;

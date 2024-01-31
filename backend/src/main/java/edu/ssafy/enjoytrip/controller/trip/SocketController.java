@@ -26,7 +26,7 @@ public class SocketController {
 	private final SimpMessagingTemplate messagingTemplate;
 	
     @MessageMapping("/chat/message")
-    public void CreateChatting(ChattingDto.ChattingRequestDto requestDto) {
+    public void CreateChatting(ChattingDto.CreateRequest requestDto) {
     	service.createChatting(requestDto);
     	messagingTemplate.convertAndSend("/sub/chat/" + requestDto.getRoomId(), requestDto);
     }

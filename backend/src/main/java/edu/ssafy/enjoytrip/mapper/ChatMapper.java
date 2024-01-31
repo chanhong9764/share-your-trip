@@ -14,7 +14,7 @@ public interface ChatMapper {
 	// 채팅방 관련 기능들
 	List<ChattingRoom> getChattingRoomList(String userId);
 	void createChattingRoom(ChattingRoomDto.ChattingRoomCreateRequestDto chattingRoomDto);
-	int deleteChattingRoom(Map<String, Object> map);
+	int deleteChattingRoom(ChattingDto.DeleteChattingRequest requestDto);
 	
 	// 채팅방 참여 기능
 	void createParticipantRoom(ChattingParticipant chattingParticipant);
@@ -27,5 +27,5 @@ public interface ChatMapper {
 	
 	// 채팅 관련 기능
 	void createChatting(Chatting chatting);
-	ArrayList<ChattingDto> getChattingList(Map<String, Object> map);
+	ArrayList<ChattingDto> getChattingList(ChattingDto.ChattingListRequest requestDto);
 }

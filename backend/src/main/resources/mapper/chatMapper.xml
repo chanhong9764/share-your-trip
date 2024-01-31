@@ -12,7 +12,7 @@
 		<result column="createdAt" property="createdAt"/>
 	</resultMap>
 	
-	<resultMap type="chatting" id="chattingResultMap">
+	<resultMap type="edu.ssafy.enjoytrip.dto.chat.ChattingDto$ChattingListResponse" id="chattingResultMap">
 		<result column="chatting_id" property="chattingId"/>
 		<result column="message" property="message"/>
 		<result column="user_id" property="userId"/>
@@ -50,7 +50,7 @@
 		</selectKey>
 	</insert>
 	
-	<delete id="deleteChattingRoom" parameterType="map">
+	<delete id="deleteChattingRoom" parameterType="edu.ssafy.enjoytrip.dto.chat.ChattingDto$DeleteChattingRequest">
 		delete from chatting_participant
 		where room_id = #{roomId} and user_id = #{userId}
 	</delete>
@@ -112,7 +112,7 @@
 		where room_id = #{roomId} and p.isAccepted = 1;
 	</select>
 	
-	<select id="getChattingList" parameterType="map" resultMap="chattingResultMap">
+	<select id="getChattingList" parameterType="edu.ssafy.enjoytrip.dto.chat.ChattingDto$ChattingListRequest" resultMap="chattingResultMap">
 		select * from (
 			select c.chatting_id, c.message, c.createdAt, c.room_id, u.profile, u.user_id
 				from chatting c
@@ -120,7 +120,7 @@
 				on c.user_id = u.user_id
 				where room_id = #{roomId}
 		        order by createdAt desc
-		        limit #{start}, #{listsize}
+		        limit #{start}, #{listSize}
 		    ) t
 		    order by t.createdAt asc;
 	</select>
