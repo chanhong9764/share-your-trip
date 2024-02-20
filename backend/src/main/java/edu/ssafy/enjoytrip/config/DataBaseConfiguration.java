@@ -2,6 +2,7 @@ package edu.ssafy.enjoytrip.config;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import edu.ssafy.enjoytrip.util.UserAuthorityTypeHandler;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -42,6 +43,7 @@ public class DataBaseConfiguration {
 		session.setDataSource(dataSource);
 		session.setMapperLocations(applicationContext.getResources("classpath:mapper/**/*.xml"));
 		session.setTypeAliasesPackage("edu.ssafy.enjoytrip.dto.*");
+		session.setTypeHandlers(new UserAuthorityTypeHandler());
 		return session.getObject();
 	}
 

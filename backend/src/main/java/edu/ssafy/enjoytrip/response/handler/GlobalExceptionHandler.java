@@ -73,6 +73,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllException(final Exception e) {
         final ResponseCode responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR;
+        System.out.println(e.toString());
         return handleExceptionInternal(responseCode);
     }
 

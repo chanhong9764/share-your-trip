@@ -21,7 +21,7 @@ public enum SuccessCode implements ResponseCode {
     SEND_USER_EMAIL_SUCCESS(HttpStatus.OK, "인증번호를 발송했습니다."),
     CHANGE_PASSWORD_USER_SUCCESS(HttpStatus.OK, "비밀번호를 변경했습니다."),
     CHANGE_PROFILE_USER_SUCCESS(HttpStatus.OK, "프로필을 변경했습니다."),
-
+    CREATED_TOKEN_SUCCESS(HttpStatus.OK, "토큰 재생성에 성공했습니다."),
     /*
         TRIP
      */

@@ -4,9 +4,17 @@ import lombok.*;
 import org.apache.ibatis.type.Alias;
 
 import org.hibernate.validator.constraints.Length;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Alias("user")
@@ -16,26 +24,17 @@ public class User {
 	private String userName;
 	private String email;
 	private String joinDate;
-	private String salt;
 	private String profile;
+	private Role role;
 	@Builder
-	public User(String userId, String userPassword, String userName, String email, String joinDate, String salt, String profile) {
+	public User(String userId, String userPassword, String userName, String email, String joinDate, String profile, Role role) {
 		this.userId = userId;
 		this.userPassword = userPassword;
 		this.userName = userName;
 		this.email = email;
 		this.joinDate = joinDate;
-		this.salt = salt;
 		this.profile = profile;
-	}
-
-	public void passwordAndSaltUpdate(String userPassword, String salt) {
-		this.userPassword = userPassword;
-		this.salt = salt;
-	}
-
-	public void passwordUpdate(String userPassword) {
-		this.userPassword = userPassword;
+		this.role = role;
 	}
 
 	public UserDto.UserInfoResponseDTO toUserInfoResponse() {
@@ -45,6 +44,7 @@ public class User {
 				.email(email)
 				.joinDate(joinDate)
 				.profile(profile)
+				.role(role)
 				.build();
 	}
 }

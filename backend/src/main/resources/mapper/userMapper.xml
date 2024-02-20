@@ -3,8 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper
-        namespace="edu.ssafy.enjoytrip.mapper.UserMapper">
+<mapper namespace="edu.ssafy.enjoytrip.mapper.UserMapper">
 
     <resultMap type="User" id="userResultMap">
         <result column="user_id" property="userId"/>
@@ -12,13 +11,13 @@
         <result column="user_name" property="userName"/>
         <result column="email" property="email"/>
         <result column="join_date" property="joinDate"/>
-        <result column="salt" property="salt"/>
         <result column="profile" property="profile"/>
+        <result column="role" property="role"/>
     </resultMap>
 
     <insert id="addUser" parameterType="User">
-        INSERT into users(user_id, user_password, user_name, email, join_date, salt, profile)
-        VALUES (#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{salt}, #{profile})
+        INSERT into users(user_id, user_password, user_name, email, join_date, profile)
+        VALUES (#{userId}, #{userPassword}, #{userName}, #{email}, now(), #{profile})
     </insert>
 
     <update id="modifyUser" parameterType="User">
@@ -33,7 +32,7 @@
     </delete>
 
     <select id="findById" parameterType="String" resultMap="userResultMap">
-        SELECT user_id, user_name, email, join_date, profile
+        SELECT user_id, user_password, user_name, email, join_date, profile, role
         FROM users
         WHERE user_id = #{userId};
     </select>
@@ -44,19 +43,14 @@
         WHERE user_id = #{userId};
     </select>
 
-    <select id="getUserSalt" parameterType="String" resultType="string">
-        SELECT salt FROM users
-        WHERE user_id= #{userId};
-    </select>
-
     <select id="login" parameterType="map" resultMap="userResultMap">
-        SELECT user_id, user_name, email, join_date, profile
+        SELECT user_id, user_name, email, join_date, profile, role
         FROM users
         WHERE user_id= #{userId} AND user_password= #{userPassword};
     </select>
 
     <select id="searchUser" parameterType="string" resultMap="userResultMap">
-        SELECT user_id, user_name, email, join_date, profile
+        SELECT user_id, user_name, email, join_date, profile, role
         FROM users
         WHERE user_id like CONCAT('%', #{userId}, '%')
     </select>
