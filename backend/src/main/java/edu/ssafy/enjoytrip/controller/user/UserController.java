@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import edu.ssafy.enjoytrip.dto.user.JwtToken;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.code.SuccessCode;
@@ -68,8 +69,13 @@ public class UserController {
 	@PostMapping("/login")
 	public ResponseEntity<Object> Login(@RequestBody @Valid UserDto.LoginRequestDTO requestDTO) {
 		UserDto.UserInfoResponseDTO responseDTO = service.login(requestDTO);
-
 		return SuccessResponse.createSuccess(SuccessCode.LOGIN_USER_SUCCESS, responseDTO);
+	}
+
+	@PostMapping("/regenerateToken")
+	public ResponseEntity<Object> regenerateToken(@RequestBody UserDto.RegenerateTokenDto requestDTO) {
+		JwtToken jwtToken = service.regenerateToken(requestDTO);
+		return SuccessResponse.createSuccess(SuccessCode.CREATED_TOKEN_SUCCESS, jwtToken);
 	}
 
 	@GetMapping("/check/{userid}")

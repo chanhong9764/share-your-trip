@@ -33,6 +33,10 @@ public class UserDto {
             this.email = email;
         }
 
+        public void updatePassword(String userPassword) {
+            this.userPassword = userPassword;
+        }
+
         public User toEntity() {
             return User.builder()
                     .userId(userId)
@@ -84,19 +88,30 @@ public class UserDto {
         private String joinDate;
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         private String profile;
+        private Role role;
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        private String accessToken;
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        private String refreshToken;
         @Builder
         public UserInfoResponseDTO(
                 String userId,
                 String userName,
                 String email,
                 String joinDate,
-                String profile
+                String profile,
+                Role role,
+                String accessToken,
+                String refreshToken
         ) {
             this.userId = userId;
             this.userName = userName;
             this.email = email;
             this.joinDate = joinDate;
             this.profile = profile;
+            this.role = role;
+            this.accessToken = accessToken;
+            this.refreshToken = refreshToken;
         }
     }
 
@@ -114,6 +129,16 @@ public class UserDto {
             return User.builder()
                     .userId(userId)
                     .userPassword(userPassword).build();
+        }
+    }
+
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class RegenerateTokenDto {
+        private String refreshToken;
+
+        public RegenerateTokenDto(String refreshToken) {
+            this.refreshToken = refreshToken;
         }
     }
 }

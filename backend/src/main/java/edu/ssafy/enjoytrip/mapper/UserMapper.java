@@ -12,7 +12,6 @@ public interface UserMapper {
 
 	Optional<User> findById(String userId);
 	void addUser(User user);
-	Optional<String> getUserSalt(String userId);
 	int modifyUser(User user);
 	String checkById(String userId);
 	Optional<String> findByEmail(String email);

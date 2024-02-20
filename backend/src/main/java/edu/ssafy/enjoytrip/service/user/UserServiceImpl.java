@@ -6,14 +6,24 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import edu.ssafy.enjoytrip.dto.user.JwtToken;
 import edu.ssafy.enjoytrip.dto.user.UserDto;
 import edu.ssafy.enjoytrip.response.code.CommonResponseCode;
 import edu.ssafy.enjoytrip.response.code.CustomResponseCode;
 import edu.ssafy.enjoytrip.response.exception.RestApiException;
+import edu.ssafy.enjoytrip.response.structure.ErrorResponse;
+import edu.ssafy.enjoytrip.util.JwtTokenProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import edu.ssafy.enjoytrip.dto.user.User;
@@ -27,11 +37,17 @@ import javax.mail.internet.MimeMessage;
 @Service("UserServiceImpl")
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, String> redisTemplate;
+    @Value("${jwt.refresh-expiration-time}")
+    private long refreshTokenExpiresIn;
+
     private final JavaMailSender javaMailSender;
     private static final String senderEmail= "chan97842@gmail.com";
     private static int number;
     private final UserMapper userMapper;
-    private final BoardMapper BoardMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDto.UserInfoResponseDTO findById(final String userId) {
@@ -41,15 +57,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void addUser(final UserDto.AddRequestDTO requestDTO) {
-        byte[] salt = getSalt();
-
-        byte[] byteDigestPsw = getSaltHashSHA512(requestDTO.getUserPassword(), salt);
-        String strDigestPsw = toHex(byteDigestPsw);
-        String strSalt = toHex(salt);
+        userMapper.findById(requestDTO.getUserId()).ifPresent((user) -> {
+                    throw new RestApiException(CustomResponseCode.USER_EXIST);
+                });
+        requestDTO.updatePassword(passwordEncoder.encode(requestDTO.getUserPassword()));
 
         User user = requestDTO.toEntity();
-        user.passwordAndSaltUpdate(strDigestPsw, strSalt);
-
         try {
             userMapper.addUser(user);
         } catch (DataIntegrityViolationException e) {
@@ -68,16 +81,56 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto.UserInfoResponseDTO login(final UserDto.LoginRequestDTO requestDTO) {
-        String strSalt = getSaltById(requestDTO.getUserId());
-        byte[] salt = fromHex(strSalt);
-        byte[] byteDigestPsw = getSaltHashSHA512(requestDTO.getUserPassword(), salt);
-        String strDigestPsw = toHex(byteDigestPsw);
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(requestDTO.getUserId(), requestDTO.getUserPassword());
 
-        User user = requestDTO.toEntity();
-        user.passwordUpdate(strDigestPsw);
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        return userMapper.login(user)
-                .orElseThrow(() -> new RestApiException(CommonResponseCode.UNAUTHORIZED_REQUEST)).toUserInfoResponse();
+        User user = userMapper.findById(requestDTO.getUserId())
+                .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        redisTemplate.opsForValue().set(
+                user.getUserId(),
+                jwtToken.getRefreshToken(),
+                refreshTokenExpiresIn,
+                TimeUnit.MILLISECONDS
+        );
+        return UserDto.UserInfoResponseDTO.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .joinDate(user.getJoinDate())
+                .profile(user.getProfile())
+                .role(user.getRole())
+                .email(user.getEmail())
+                .accessToken(jwtToken.getAccessToken())
+                .refreshToken(jwtToken.getRefreshToken())
+                .build();
+    }
+
+    @Override
+    public JwtToken regenerateToken(UserDto.RegenerateTokenDto requestDto) {
+        // refresh token 검증
+        if(!jwtTokenProvider.validateToken(requestDto.getRefreshToken())) {
+            throw new RestApiException(CommonResponseCode.UNAUTHORIZED_REQUEST);
+        }
+        Authentication authentication = jwtTokenProvider.getAuthentication(requestDto.getRefreshToken());
+
+        // Redis에서 refresh token 값을 가져온다.
+        String refreshToken = redisTemplate.opsForValue().get(authentication.getName());
+
+        if(!requestDto.getRefreshToken().equals(refreshToken)) {
+            throw new RestApiException(CommonResponseCode.INVALID_PARAMETER);
+        }
+
+        JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        redisTemplate.opsForValue().set(
+                authentication.getName(),
+                jwtToken.getRefreshToken(),
+                refreshTokenExpiresIn,
+                TimeUnit.MILLISECONDS
+        );
+        return jwtToken;
     }
 
     @Override
@@ -85,14 +138,8 @@ public class UserServiceImpl implements UserService {
         if(!requestDTO.getUserPassword().equals(requestDTO.getUserConfirmPassword())) {
             throw new RestApiException(CustomResponseCode.INVALID_USER_PARAMETER);
         }
-        String strSalt = getSaltById(requestDTO.getUserId());
-
-        byte[] salt = fromHex(strSalt);
-        byte[] byteDigestPsw = getSaltHashSHA512(requestDTO.getUserPassword(), salt);
-        String strDigestPsw = toHex(byteDigestPsw);
 
         User user = requestDTO.toEntity();
-        user.passwordUpdate(strDigestPsw);
 
         int cnt = userMapper.modifyUser(user);
         if(cnt == 0) {
@@ -138,13 +185,8 @@ public class UserServiceImpl implements UserService {
         if(!requestDTO.getUserPassword().equals(requestDTO.getUserConfirmPassword())) {
             throw new RestApiException(CustomResponseCode.INVALID_USER_PARAMETER);
         }
-        String strSalt = getSaltById(requestDTO.getUserId());
-        byte[] salt = fromHex(strSalt);
-        byte[] byteDigestPsw = getSaltHashSHA512(requestDTO.getUserPassword(), salt);
-        String strDigestPsw = toHex(byteDigestPsw);
-        User user = requestDTO.toEntity();
-        user.passwordUpdate(strDigestPsw);
 
+        User user = requestDTO.toEntity();
         int cnt = userMapper.changePassword(user);
         if(cnt == 0) {
             throw new RestApiException(CustomResponseCode.USER_NOT_FOUND);
@@ -157,11 +199,6 @@ public class UserServiceImpl implements UserService {
         if(cnt == 0) {
             throw new RestApiException(CustomResponseCode.USER_NOT_FOUND);
         }
-    }
-
-    public String getSaltById(final String userId) {
-        return userMapper.getUserSalt(userId)
-                .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
     }
 
     // 인증번호 생성기
@@ -186,49 +223,5 @@ public class UserServiceImpl implements UserService {
             throw new RestApiException(CustomResponseCode.EMAIL_NOT_CREATED);
         }
         return message;
-    }
-
-    private byte[] getSaltHashSHA512(final String userPassword, final byte[] salt) {
-        MessageDigest md = null;
-        try {
-            md = MessageDigest.getInstance("SHA-512");
-        } catch (NoSuchAlgorithmException e) {
-            throw new RestApiException(CustomResponseCode.PASSWORD_NOT_CREATED);
-        }
-        md.update(salt);
-        byte[] byteData = md.digest(userPassword.getBytes());
-        md.reset();
-        return byteData;
-    }
-
-    private byte[] getSalt() {
-        SecureRandom sr = null;
-        try {
-            sr = SecureRandom.getInstanceStrong();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RestApiException(CustomResponseCode.PASSWORD_NOT_CREATED);
-        }
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
-    }
-
-    public byte[] fromHex(final String hex) {
-        byte[] binary = new byte[hex.length() / 2];
-        for (int i = 0; i < binary.length; i++) {
-            binary[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
-        }
-        return binary;
-    }
-
-    public String toHex(final byte[] array) {
-        BigInteger bi = new BigInteger(1, array);
-        String hex = bi.toString(16);
-        int paddingLength = (array.length * 2) - hex.length();
-        if (paddingLength > 0) {
-            return String.format("%0" + paddingLength + "d", 0) + hex;
-        } else {
-            return hex;
-        }
     }
 }

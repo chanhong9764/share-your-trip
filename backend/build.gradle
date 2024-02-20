@@ -38,6 +38,14 @@ dependencies {
     runtimeOnly libs.org.springframework.boot.spring.boot.devtools
     testImplementation libs.org.springframework.boot.spring.boot.starter.test
     annotationProcessor libs.org.projectlombok.lombok
+
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security
+    implementation 'org.springframework.boot:spring-boot-starter-security:2.7.18'
+    implementation group: 'io.jsonwebtoken', name: 'jjwt-api', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-impl', version: '0.11.5'
+    runtimeOnly group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: '0.11.5'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:2.2.2.RELEASE'
 }
 
 group = 'edu.ssafy.enjoytrip'
