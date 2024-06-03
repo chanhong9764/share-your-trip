@@ -26,6 +26,7 @@ public class User {
 	private String joinDate;
 	private String profile;
 	private Role role;
+	private String refreshToken;
 	@Builder
 	public User(String userId, String userPassword, String userName, String email, String joinDate, String profile, Role role) {
 		this.userId = userId;

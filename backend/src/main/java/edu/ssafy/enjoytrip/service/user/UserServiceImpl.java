@@ -87,6 +87,7 @@ public class UserServiceImpl implements UserService {
 
         User user = userMapper.findById(requestDTO.getUserId())
                 .orElseThrow(() -> new RestApiException(CustomResponseCode.USER_NOT_FOUND));
+
         JwtToken jwtToken = jwtTokenProvider.generateToken(authentication);
 
         redisTemplate.opsForValue().set(
@@ -95,6 +96,7 @@ public class UserServiceImpl implements UserService {
                 refreshTokenExpiresIn,
                 TimeUnit.MILLISECONDS
         );
+
         return UserDto.UserInfoResponseDTO.builder()
                 .userId(user.getUserId())
                 .userName(user.getUserName())
@@ -109,10 +111,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public JwtToken regenerateToken(UserDto.RegenerateTokenDto requestDto) {
-        // refresh token 검증
-        if(!jwtTokenProvider.validateToken(requestDto.getRefreshToken())) {
-            throw new RestApiException(CommonResponseCode.UNAUTHORIZED_REQUEST);
-        }
         Authentication authentication = jwtTokenProvider.getAuthentication(requestDto.getRefreshToken());
 
         // Redis에서 refresh token 값을 가져온다.

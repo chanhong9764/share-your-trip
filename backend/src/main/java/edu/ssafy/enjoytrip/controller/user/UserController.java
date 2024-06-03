@@ -14,8 +14,12 @@ import edu.ssafy.enjoytrip.response.structure.SuccessResponse;
 import edu.ssafy.enjoytrip.validation.common.Image;
 import edu.ssafy.enjoytrip.validation.user.UserEmail;
 import edu.ssafy.enjoytrip.validation.user.UserId;
+import io.jsonwebtoken.JwtException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -54,6 +58,7 @@ public class UserController {
 		return SuccessResponse.createSuccess(SuccessCode.DELETE_USER_SUCCESS);
 	}
 
+	@PostAuthorize("(returnObject.body.data.userId == principal.username) or hasRole('ROLE_ADMIN')")
 	@GetMapping("/{userid}")
 	public ResponseEntity<Object> SelectUser(@PathVariable("userid") @UserId final String userId) {
 		UserDto.UserInfoResponseDTO responseDTO = service.findById(userId);
@@ -73,7 +78,7 @@ public class UserController {
 	}
 
 	@PostMapping("/regenerateToken")
-	public ResponseEntity<Object> regenerateToken(@RequestBody UserDto.RegenerateTokenDto requestDTO) {
+	public ResponseEntity<Object> regenerateToken(@RequestBody UserDto.RegenerateTokenDto requestDTO) throws JwtException {
 		JwtToken jwtToken = service.regenerateToken(requestDTO);
 		return SuccessResponse.createSuccess(SuccessCode.CREATED_TOKEN_SUCCESS, jwtToken);
 	}

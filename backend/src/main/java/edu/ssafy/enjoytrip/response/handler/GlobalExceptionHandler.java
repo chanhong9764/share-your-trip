@@ -2,13 +2,17 @@ package edu.ssafy.enjoytrip.response.handler;
 
 import java.util.*;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
@@ -46,6 +50,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return handleExceptionInternal(responseCode, e.getMessage());
     }
 
+    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class})
+    public ResponseEntity<Object> handleJwtException(final Exception e) {
+        final ResponseCode responseCode = CommonResponseCode.INVALID_PARAMETER;
+        return handleExceptionInternal(responseCode, "유효하지 않은 토큰입니다.");
+    }
+
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<Object> handleJwtAuthException(final ExpiredJwtException e) {
+        final ResponseCode responseCode = CommonResponseCode.UNAUTHORIZED_REQUEST;
+        return handleExceptionInternal(responseCode, "만료된 토큰입니다.");
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAuthException(final AccessDeniedException e) {
+        final ResponseCode responseCode = CommonResponseCode.FORBIDDEN_ACCESS;
+        return handleExceptionInternal(responseCode, "권한이 존재하지 않습니다.");
+    }
+
     /**
      * RequestBody javax.validation.Valid or @Validated 으로 binding error 발생시 발생
      */
@@ -73,7 +95,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleAllException(final Exception e) {
         final ResponseCode responseCode = CommonResponseCode.INTERNAL_SERVER_ERROR;
-        System.out.println(e.toString());
+        System.out.println(e.getMessage());
         return handleExceptionInternal(responseCode);
     }
 

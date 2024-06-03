@@ -20,4 +20,6 @@ public interface UserMapper {
 	Optional<User> login(User dto);
 	List<User> searchUser(String userId);
 	int modifyProfile(User user);
+
+	int updateRefreshToken(String token);
 }

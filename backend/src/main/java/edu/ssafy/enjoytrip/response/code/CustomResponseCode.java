@@ -63,6 +63,13 @@ public enum CustomResponseCode implements ResponseCode {
     HASHTAG_NOT_DELETED(HttpStatus.INTERNAL_SERVER_ERROR, "해시태그 삭제에 실패했습니다."),
     HASHTAG_POST_NOT_CREATED(HttpStatus.INTERNAL_SERVER_ERROR, "해시태그와 게시글 연동을 실패했습니다."),
     HOT_HASHTAG_NOT_FOUND(HttpStatus.INTERNAL_SERVER_ERROR, "인기 해시태그를 조회에 실패했습니다."),
+
+    /*
+        AUTH
+     */
+    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    UN_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "지원하지 않는 토큰 형식입니다."),
     ;
     private final HttpStatus httpStatus;
     private final String message;
